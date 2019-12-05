@@ -88,6 +88,11 @@ h2 {
     width: 100%;
     border-bottom: 5px solid #1d2b36;
 }
+
+canvas{
+    margin-right: 30em;
+    margin-left: 30em;
+}
 @media screen and (min-width: 1000px) {
     .proposalgrid {
         width: 100%;
