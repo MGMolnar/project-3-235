@@ -3,12 +3,20 @@
 const app = new PIXI.Application(600,600);
 document.body.appendChild(app.view);
 
+PIXI.loader.
+add('media/squirmleTest.png');
+
 let titleScreen;
 let endScreen;
 let gameScreen;
 let controlScreen;
 let bigSquirmle;
 let stage;
+let keys = {};
+let keysDiv;
+
+window.addEventListener("keydown", keysDown);
+window.addEventListener("keyup", keysUp);
 
 createPages();
 
@@ -22,13 +30,15 @@ function createPages(){
     stage.addChild(titleScreen);
  
     //a function that will put all the text,
-    //objects, or buttons onto the title s'creen
+    //objects, or buttons onto the title screen
     settupTitleScreen();
-
 
     gameScreen = new PIXI.Container();
     gameScreen.visible = false;
     stage.addChild(gameScreen);
+
+    bigSquirmle = new BigSquirmle();
+    gameScreen.addChild(bigSquirmle);
 
     controlScreen = new PIXI.Container();
     controlScreen.visible = false;
@@ -38,8 +48,12 @@ function createPages(){
     endScreen.visible = false;
     stage.addChild(endScreen);
 
+    // Start update loop
+    app.ticker.add(gameLoop);
 
+    keysDiv = document.querySelector("#keys");
 }
+
 
 //will create all the text, buttons, and objects
 //onto the title screen
@@ -99,8 +113,63 @@ function settupControlScreen(){
 
 //function that starts the game for the player
 function startGame(){
-
-    //changes the visible screen to the game screen
+    // changes the visible screen to the game screen
     titleScreen.visible = false;
     gameScreen.visible = true;
+}
+
+function gameLoop(){
+    keysDiv.innerHTML = JSON.stringify(keys);
+    
+    movementBigSquirmle();
+    
+	//if (paused) return; // keep this commented out for now
+	
+	// #1 - Calculate "delta time"
+    //let dt = 1/app.ticker.FPS;
+    //if (dt > 1/12) dt=1/12;
+}
+
+function movementBigSquirmle(){
+    let prevDirection = bigSquirmle.direction;
+
+    // Use else if statements as the big squirmle won't be able to move diagonally
+    // Also prevent big squirmle from going the opposite direction that it is currently traveling
+    // so it won't kill itself
+    if (keys["87"] && prevDirection != "down"){ // W
+        bigSquirmle.direction = "up";
+    }
+    else if (keys["65"] && prevDirection != "right"){ // A
+        bigSquirmle.direction = "left";
+    }
+    else if (keys["83"] && prevDirection != "up"){ // S
+        bigSquirmle.direction = "down";
+    }
+    else if (keys["68"] && prevDirection != "left"){ // D
+        bigSquirmle.direction = "right";
+    }
+
+    // Move squirmle based on direction faced
+    if(bigSquirmle.direction == "up"){
+        bigSquirmle.y -= 1;
+    }
+    else if(bigSquirmle.direction == "left"){
+        bigSquirmle.x -= 1;
+    }
+    else if(bigSquirmle.direction == "down"){
+        bigSquirmle.y += 1;
+    }
+    else if(bigSquirmle.direction == "right"){
+        bigSquirmle.x += 1;
+    }
+}
+
+function keysDown(e) {
+    console.log(e.keyCode);
+    keys[e.keyCode] = true;
+}
+
+function keysUp(e) {
+    console.log(e.keyCode);
+    keys[e.keyCode] = false;
 }

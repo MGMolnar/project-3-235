@@ -1,9 +1,10 @@
-class BigSquirmel extends PIXI.Sprite{
-    constructor(x = 0, y = 0){
-        //super(PIXI.loader.resources[/*images of big squirmel*/].texture);
+class BigSquirmle extends PIXI.Sprite{
+    constructor(x = 200, y = 200, direction = "right"){
+        super(PIXI.Texture.from('media/squirmleTest.png'));
         this.anchor.set(.5, .5);
         this.x = x;
         this.y = y;
+        this.direction = direction;
     }
 
     bounceX(){
@@ -15,7 +16,7 @@ class BigSquirmel extends PIXI.Sprite{
     }
 }
 
-class BodySquirmel extends PIXI.Sprite{
+class BodySquirmle extends PIXI.Sprite{
     constructor(x = 0, y = 0){
 
     }
