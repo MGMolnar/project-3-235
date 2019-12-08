@@ -15,7 +15,6 @@ let food = null;
 
 let b = new Bump(PIXI);
 let squirmleList;
-let headSquirmle;
 let spriteHead = PIXI.Texture.fromImage("media/squirmleHead.png");
 let spriteTail = PIXI.Texture.fromImage("media/squirmleTailTest.png");
 
@@ -132,16 +131,18 @@ function startGame(){
 
     // Start update loop
     app.ticker.add(gameLoop);
+
+    setInterval(movementBigSquirmle, 100);
 }
 
 function gameLoop(){
     keysDiv.innerHTML = JSON.stringify(keys);
     
-    movementBigSquirmle()
+    //movementBigSquirmle()
 
     foodFunctions();
     
-    setInterval(movementBigSquirmle, 100);
+    
 }
 
 /*function gameLoop(){
@@ -159,8 +160,8 @@ function gameLoop(){
 
 function movementBigSquirmle(){
     // Track all of the head's direction and coordinates from the previous frame to the current
-    headSquirmle = squirmleList.head.element;
-    let prevDirection = headSquirmle.direction;
+    //headSquirmle = squirmleList.head.element;
+    let prevDirection = headSquirmle.rotation;
     headSquirmle.prevX = headSquirmle.x;
     headSquirmle.prevY = headSquirmle.y;
 
@@ -245,7 +246,7 @@ function foodFunctions(){
 //to the body of the squirmle
 function addBodySquirmle(){
 
-    let bodySquirmle = new bodySquirmle();
+    let bodySquirmle = new BodySquirmle();
     squirmleList.add(bodySquirmle);
     gameScreen.addChild(bodySquirmle)
 
