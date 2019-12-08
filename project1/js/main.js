@@ -7,9 +7,13 @@ let titleScreen;
 let endScreen;
 let gameScreen;
 let controlScreen;
-let bigSquirmle;
 let stage;
 let keys = {};
+let keysDiv;
+let headSquirmle;
+let food = null;
+
+let b = new Bump(PIXI);
 let squirmleList;
 let headSquirmle;
 let spriteHead = PIXI.Texture.fromImage("media/squirmleHead.png");
@@ -33,15 +37,11 @@ function createPages(){
     //creates the titleScreen and adds it to the stage
     titleScreen = new PIXI.Container();
     stage.addChild(titleScreen);
- 
-    //a function that will put all the text,
-    //objects, or buttons onto the title screen
-    settupTitleScreen();
 
     gameScreen = new PIXI.Container();
     gameScreen.visible = false;
     stage.addChild(gameScreen);
-
+    
     squirmleList = new LinkedList();
     squirmleList.add(new BodySquirmle());
     headSquirmle = squirmleList.head.element;
@@ -65,6 +65,12 @@ function createPages(){
     endScreen = new PIXI.Container();
     endScreen.visible = false;
     stage.addChild(endScreen);
+
+    //a function that will put all the text,
+    //objects, or buttons onto the title screen
+    settupTitleScreen();
+
+    keysDiv = document.querySelector("#keys");
 }
 
 
@@ -118,12 +124,6 @@ function settupEndScreen(){
 
 }
 
-//will create all the text, buttons, and objects
-//onto the control screen
-function settupControlScreen(){
-
-}
-
 //function that starts the game for the player
 function startGame(){
     // changes the visible screen to the game screen
@@ -132,10 +132,19 @@ function startGame(){
 
     // Start update loop
     app.ticker.add(gameLoop);
-    setInterval(movementBigSquirmle, 100);
 }
 
 function gameLoop(){
+    keysDiv.innerHTML = JSON.stringify(keys);
+    
+    movementBigSquirmle()
+
+    foodFunctions();
+    
+    setInterval(movementBigSquirmle, 100);
+}
+
+/*function gameLoop(){
 	//if (paused) return; // keep this commented out for now
 	
 	// #1 - Calculate "delta time"
@@ -146,13 +155,12 @@ function gameLoop(){
     // game loop to make it look like a staggered movement
     // where as communist shit will just roam around freely updating every frame
     //movementBigSquirmle();
-    
-}
+}*/
 
 function movementBigSquirmle(){
     // Track all of the head's direction and coordinates from the previous frame to the current
-    
-    let prevDirection = headSquirmle.rotation;
+    headSquirmle = squirmleList.head.element;
+    let prevDirection = headSquirmle.direction;
     headSquirmle.prevX = headSquirmle.x;
     headSquirmle.prevY = headSquirmle.y;
 
@@ -208,4 +216,38 @@ function keysDown(e) {
 
 function keysUp(e) {
     keys[e.keyCode] = false;
+}
+
+//function that will be used to check to see if
+//there is a collision between the head squrimle 
+function foodFunctions(){
+
+    //if there is no food create a food and add it
+    //to the scene
+    if (food == null) {
+        food = new Food();
+        gameScreen.addChild(food);
+    }
+    //if there is a food check to see if there is a collision
+    //if there is a collision remove that food and create a new food 
+    else if (food != null) {
+        if (b.hit(headSquirmle, food)) {
+            gameScreen.removeChild(food);
+            food = new Food();
+            gameScreen.addChild(food);
+
+            addBodySquirmle();
+        }
+    }
+}
+
+//function that will add a body squirmle
+//to the body of the squirmle
+function addBodySquirmle(){
+
+    let bodySquirmle = new bodySquirmle();
+    squirmleList.add(bodySquirmle);
+    gameScreen.addChild(bodySquirmle)
+
+
 }
