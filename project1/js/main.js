@@ -10,15 +10,13 @@ let titleScreen;
 let endScreen;
 let gameScreen;
 let controlScreen;
-let bigSquirmle;
 let stage;
 let keys = {};
 let keysDiv;
-let food;
+let headSquirmle;
+let food = null;
 
 let b = new Bump(PIXI);
-
-let foodSpawned = [];
 let squirmleList;
 
 window.addEventListener("keydown", keysDown);
@@ -38,9 +36,7 @@ function createPages(){
     gameScreen = new PIXI.Container();
     gameScreen.visible = false;
     stage.addChild(gameScreen);
-
-    bigSquirmle = new BigSquirmle();
-    gameScreen.addChild(bigSquirmle);
+    
     squirmleList = new LinkedList();
     squirmleList.add(new BodySquirmle());
     squirmleList.add(new BodySquirmle(180));
@@ -133,14 +129,14 @@ function startGame(){
 function gameLoop(){
     keysDiv.innerHTML = JSON.stringify(keys);
     
-    movementBigSquirmle();
+    movementBigSquirmle()
 
     foodFunctions();
     
     setInterval(movementBigSquirmle, 100);
 }
 
-function gameLoop(){
+/*function gameLoop(){
 	//if (paused) return; // keep this commented out for now
 	
 	// #1 - Calculate "delta time"
@@ -151,11 +147,11 @@ function gameLoop(){
     // game loop to make it look like a staggered movement
     // where as communist shit will just roam around freely updating every frame
     //movementBigSquirmle();
-}
+}*/
 
 function movementBigSquirmle(){
     // Track all of the head's direction and coordinates from the previous frame to the current
-    let headSquirmle = squirmleList.head.element;
+    headSquirmle = squirmleList.head.element;
     let prevDirection = headSquirmle.direction;
     headSquirmle.prevX = headSquirmle.x;
     headSquirmle.prevY = headSquirmle.y;
@@ -178,16 +174,16 @@ function movementBigSquirmle(){
 
     // Move the head's x and y coordinates based on direction facing
     if(headSquirmle.direction == "up"){
-        headSquirmle.y -= 20;
+        headSquirmle.y -= .02;
     }
     else if(headSquirmle.direction == "left"){
-        headSquirmle.x -= 20;
+        headSquirmle.x -= .02;
     }
     else if(headSquirmle.direction == "down"){
-        headSquirmle.y += 20;
+        headSquirmle.y += .02;
     }
     else if(headSquirmle.direction == "right"){
-        headSquirmle.x += 20;
+        headSquirmle.x += .02;
     }
 
     // Move each body part to the previous location of the body part in front of it
@@ -210,16 +206,36 @@ function keysUp(e) {
     keys[e.keyCode] = false;
 }
 
+//function that will be used to check to see if
+//there is a collision between the head squrimle 
 function foodFunctions(){
 
+    //if there is no food create a food and add it
+    //to the scene
     if (food == null) {
         food = new Food();
         gameScreen.addChild(food);
     }
+    //if there is a food check to see if there is a collision
+    //if there is a collision remove that food and create a new food 
     else if (food != null) {
-        if (b.hit(bigSquirmle, food)) {
-            food.isAlive = false;
-            Object.destroy(food);
+        if (b.hit(headSquirmle, food)) {
+            gameScreen.removeChild(food);
+            food = new Food();
+            gameScreen.addChild(food);
+
+            addBodySquirmle();
         }
     }
+}
+
+//function that will add a body squirmle
+//to the body of the squirmle
+function addBodySquirmle(){
+
+    let bodySquirmle = new bodySquirmle();
+    squirmleList.add(bodySquirmle);
+    gameScreen.addChild(bodySquirmle)
+
+
 }
