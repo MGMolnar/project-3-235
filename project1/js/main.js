@@ -19,6 +19,7 @@ let food;
 let b = new Bump(PIXI);
 
 let foodSpawned = [];
+let squirmleList;
 
 window.addEventListener("keydown", keysDown);
 window.addEventListener("keyup", keysUp);
@@ -40,6 +41,22 @@ function createPages(){
 
     bigSquirmle = new BigSquirmle();
     gameScreen.addChild(bigSquirmle);
+    squirmleList = new LinkedList();
+    squirmleList.add(new BodySquirmle());
+    squirmleList.add(new BodySquirmle(180));
+    squirmleList.add(new BodySquirmle(170));
+    squirmleList.add(new BodySquirmle(160));
+    squirmleList.add(new BodySquirmle(150));
+
+    let current = squirmleList.head;
+    while(current != null){
+        gameScreen.addChild(current.element);
+        current = current.next;
+    }
+    
+    controlScreen = new PIXI.Container();
+    controlScreen.visible = false;
+    stage.addChild(controlScreen);
 
     endScreen = new PIXI.Container();
     endScreen.visible = false;
@@ -120,54 +137,76 @@ function gameLoop(){
 
     foodFunctions();
     
+    setInterval(movementBigSquirmle, 100);
+}
+
+function gameLoop(){
 	//if (paused) return; // keep this commented out for now
 	
 	// #1 - Calculate "delta time"
     //let dt = 1/app.ticker.FPS;
-    //if (dt > 1/12) dt=1/12;
+    //if (dt > 1/30) dt=1/30;
+
+    // Likely going to exclude the movementBigSquirmle() from the
+    // game loop to make it look like a staggered movement
+    // where as communist shit will just roam around freely updating every frame
+    //movementBigSquirmle();
 }
 
 function movementBigSquirmle(){
-    let prevDirection = bigSquirmle.direction;
+    // Track all of the head's direction and coordinates from the previous frame to the current
+    let headSquirmle = squirmleList.head.element;
+    let prevDirection = headSquirmle.direction;
+    headSquirmle.prevX = headSquirmle.x;
+    headSquirmle.prevY = headSquirmle.y;
 
     // Use else if statements as the big squirmle won't be able to move diagonally
     // Also prevent big squirmle from going the opposite direction that it is currently traveling
     // so it won't kill itself
     if (keys["87"] && prevDirection != "down"){ // W
-        bigSquirmle.direction = "up";
+        headSquirmle.direction = "up";
     }
     else if (keys["65"] && prevDirection != "right"){ // A
-        bigSquirmle.direction = "left";
+        headSquirmle.direction = "left";
     }
     else if (keys["83"] && prevDirection != "up"){ // S
-        bigSquirmle.direction = "down";
+        headSquirmle.direction = "down";
     }
     else if (keys["68"] && prevDirection != "left"){ // D
-        bigSquirmle.direction = "right";
+        headSquirmle.direction = "right";
     }
 
-    // Move squirmle based on direction faced
-    if(bigSquirmle.direction == "up"){
-        bigSquirmle.y -= 1;
+    // Move the head's x and y coordinates based on direction facing
+    if(headSquirmle.direction == "up"){
+        headSquirmle.y -= 20;
     }
-    else if(bigSquirmle.direction == "left"){
-        bigSquirmle.x -= 1;
+    else if(headSquirmle.direction == "left"){
+        headSquirmle.x -= 20;
     }
-    else if(bigSquirmle.direction == "down"){
-        bigSquirmle.y += 1;
+    else if(headSquirmle.direction == "down"){
+        headSquirmle.y += 20;
     }
-    else if(bigSquirmle.direction == "right"){
-        bigSquirmle.x += 1;
+    else if(headSquirmle.direction == "right"){
+        headSquirmle.x += 20;
+    }
+
+    // Move each body part to the previous location of the body part in front of it
+    let current = squirmleList.head.next;
+    while(current != null){
+        current.element.prevX = current.element.x;
+        current.element.prevY = current.element.y;
+        current.element.x = current.prev.element.prevX;
+        current.element.y = current.prev.element.prevY;
+
+        current = current.next;
     }
 }
 
 function keysDown(e) {
-    console.log(e.keyCode);
     keys[e.keyCode] = true;
 }
 
 function keysUp(e) {
-    console.log(e.keyCode);
     keys[e.keyCode] = false;
 }
 
