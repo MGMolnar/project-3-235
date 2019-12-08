@@ -3,9 +3,6 @@
 const app = new PIXI.Application(600,600);
 document.body.appendChild(app.view);
 
-PIXI.loader.
-add('media/squirmleTest.png');
-
 let titleScreen;
 let endScreen;
 let gameScreen;
@@ -14,6 +11,14 @@ let bigSquirmle;
 let stage;
 let keys = {};
 let squirmleList;
+let headSquirmle;
+let spriteHead = PIXI.Texture.fromImage("media/squirmleHead.png");
+let spriteTail = PIXI.Texture.fromImage("media/squirmleTailTest.png");
+
+let up = 0;
+let left = 3 * Math.PI/2;
+let down = Math.PI;
+let right = Math.PI/2;
 
 window.addEventListener("keydown", keysDown);
 window.addEventListener("keyup", keysUp);
@@ -39,10 +44,13 @@ function createPages(){
 
     squirmleList = new LinkedList();
     squirmleList.add(new BodySquirmle());
+    headSquirmle = squirmleList.head.element;
+    headSquirmle.texture = spriteHead;
     squirmleList.add(new BodySquirmle(180));
-    squirmleList.add(new BodySquirmle(170));
     squirmleList.add(new BodySquirmle(160));
-    squirmleList.add(new BodySquirmle(150));
+    squirmleList.add(new BodySquirmle(140));
+    squirmleList.add(new BodySquirmle(120));
+    squirmleList.tail.element.texture = spriteTail;
 
     let current = squirmleList.head;
     while(current != null){
@@ -138,42 +146,47 @@ function gameLoop(){
     // game loop to make it look like a staggered movement
     // where as communist shit will just roam around freely updating every frame
     //movementBigSquirmle();
+    
 }
 
 function movementBigSquirmle(){
     // Track all of the head's direction and coordinates from the previous frame to the current
-    let headSquirmle = squirmleList.head.element;
-    let prevDirection = headSquirmle.direction;
+    
+    let prevDirection = headSquirmle.rotation;
     headSquirmle.prevX = headSquirmle.x;
     headSquirmle.prevY = headSquirmle.y;
 
     // Use else if statements as the big squirmle won't be able to move diagonally
     // Also prevent big squirmle from going the opposite direction that it is currently traveling
     // so it won't kill itself
-    if (keys["87"] && prevDirection != "down"){ // W
-        headSquirmle.direction = "up";
+    if (keys["87"] && prevDirection != down){ // W
+        headSquirmle.rotation = up;
     }
-    else if (keys["65"] && prevDirection != "right"){ // A
-        headSquirmle.direction = "left";
+    else if (keys["65"] && prevDirection != right){ // A
+        headSquirmle.rotation = left;
     }
-    else if (keys["83"] && prevDirection != "up"){ // S
-        headSquirmle.direction = "down";
+    else if (keys["83"] && prevDirection != up){ // S
+        headSquirmle.rotation = down;
     }
-    else if (keys["68"] && prevDirection != "left"){ // D
-        headSquirmle.direction = "right";
+    else if (keys["68"] && prevDirection != left){ // D
+        headSquirmle.rotation = right;
+    }
+    else if(keys["32"]){ // Spacebar
+        squirmleList.poop();
+        squirmleList.tail.element.texture = spriteTail;
     }
 
     // Move the head's x and y coordinates based on direction facing
-    if(headSquirmle.direction == "up"){
+    if(headSquirmle.rotation % (2 * Math.PI) == up){
         headSquirmle.y -= 20;
     }
-    else if(headSquirmle.direction == "left"){
+    else if(headSquirmle.rotation % (2 * Math.PI) == left){
         headSquirmle.x -= 20;
     }
-    else if(headSquirmle.direction == "down"){
+    else if(headSquirmle.rotation % (2 * Math.PI) == down){
         headSquirmle.y += 20;
     }
-    else if(headSquirmle.direction == "right"){
+    else if(headSquirmle.rotation % (2 * Math.PI) == right){
         headSquirmle.x += 20;
     }
 
