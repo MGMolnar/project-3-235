@@ -14,6 +14,11 @@ let bigSquirmle;
 let stage;
 let keys = {};
 let keysDiv;
+let food;
+
+let b = new Bump(PIXI);
+
+let foodSpawned = [];
 
 window.addEventListener("keydown", keysDown);
 window.addEventListener("keyup", keysUp);
@@ -28,10 +33,6 @@ function createPages(){
     //creates the titleScreen and adds it to the stage
     titleScreen = new PIXI.Container();
     stage.addChild(titleScreen);
- 
-    //a function that will put all the text,
-    //objects, or buttons onto the title screen
-    settupTitleScreen();
 
     gameScreen = new PIXI.Container();
     gameScreen.visible = false;
@@ -40,16 +41,13 @@ function createPages(){
     bigSquirmle = new BigSquirmle();
     gameScreen.addChild(bigSquirmle);
 
-    controlScreen = new PIXI.Container();
-    controlScreen.visible = false;
-    stage.addChild(controlScreen);
-
     endScreen = new PIXI.Container();
     endScreen.visible = false;
     stage.addChild(endScreen);
 
-    // Start update loop
-    app.ticker.add(gameLoop);
+    //a function that will put all the text,
+    //objects, or buttons onto the title screen
+    settupTitleScreen();
 
     keysDiv = document.querySelector("#keys");
 }
@@ -105,23 +103,22 @@ function settupEndScreen(){
 
 }
 
-//will create all the text, buttons, and objects
-//onto the control screen
-function settupControlScreen(){
-
-}
-
 //function that starts the game for the player
 function startGame(){
     // changes the visible screen to the game screen
     titleScreen.visible = false;
     gameScreen.visible = true;
+
+    // Start update loop
+    app.ticker.add(gameLoop);
 }
 
 function gameLoop(){
     keysDiv.innerHTML = JSON.stringify(keys);
     
     movementBigSquirmle();
+
+    foodFunctions();
     
 	//if (paused) return; // keep this commented out for now
 	
@@ -172,4 +169,18 @@ function keysDown(e) {
 function keysUp(e) {
     console.log(e.keyCode);
     keys[e.keyCode] = false;
+}
+
+function foodFunctions(){
+
+    if (food == null) {
+        food = new Food();
+        gameScreen.addChild(food);
+    }
+    else if (food != null) {
+        if (b.hit(bigSquirmle, food)) {
+            food.isAlive = false;
+            Object.destroy(food);
+        }
+    }
 }

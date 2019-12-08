@@ -29,3 +29,15 @@ class BodySquirmle extends PIXI.Sprite{
         this.fwd.y *= -1;
     }
 }
+
+class Food extends PIXI.Graphics{
+    constructor(x = 0, y = 0, color = 0xFFFFFF){
+        super();
+        this.beginFill(color);
+        this.drawRect(-2, -2, 4, 6);
+        this.endFill();
+        this.x = parseInt(Math.random(100, 500) * 100);
+        this.y = parseInt(Math.random(100, 500) * 100);
+        this.isAlive = true;
+    }
+}
