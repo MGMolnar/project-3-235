@@ -1,12 +1,12 @@
 class BodySquirmle extends PIXI.Sprite{
-    constructor(x = 200, y = 200, direction = "right"){
-        super(PIXI.Texture.from('media/squirmleTest.png'));
+    constructor(x = 200, y = 200, rotation = Math.PI/2, texture = "media/squirmleTest.png"){
+        super(PIXI.Texture.from(texture));
         this.anchor.set(.5, .5);
         this.x = x;
         this.y = y;
-        this.direction = direction;
         this.prevX = x;
         this.prevY = y;
+        this.rotation = rotation;
     }
 }
 
