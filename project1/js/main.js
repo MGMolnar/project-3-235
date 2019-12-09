@@ -323,6 +323,7 @@ function enemyFunctions(){
     });
 }
 
+//sets the endscreen to be visible
 function endGame(){
     gameScreen.visible = false;
     endScreen.visible = true;
