@@ -73,11 +73,20 @@ class Food extends PIXI.Graphics{
         this.beginFill(color);
         this.drawRect(-2, -2, 4, 6);
         this.endFill();
-        this.x = parseInt(Math.random() * 500)
-        this.y = parseInt(Math.random() * 500)
-        console.log(this.x + " X");
-        console.log(this.y + " y");
-        this.isAlive = true;
+        this.x = parseInt(Math.random() * 500);
+        this.y = parseInt(Math.random() * 500);
+    }
+}
+
+class EnemySquirmle extends PIXI.Graphics{
+    constructor(x = 250, y = 250, color = 0x00FF00){
+        super();
+        this.beginFill(color);
+        this.drawRect(-2, -2, 6, 6);
+        this.endFill();
+        this.x = parseInt(Math.random() * 500);
+        this.y = parseInt(Math.random() * 500);
+
     }
 }
 

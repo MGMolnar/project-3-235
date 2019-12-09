@@ -14,6 +14,8 @@ let stage;
 let keys = {};
 let keysDiv;
 let headSquirmle;
+
+let foodCount = 0;
 let food = null;
 
 let b = new Bump(PIXI);
@@ -36,7 +38,7 @@ function createPages(){
     gameScreen = new PIXI.Container();
     gameScreen.visible = false;
     stage.addChild(gameScreen);
-    
+
     squirmleList = new LinkedList();
     squirmleList.add(new BodySquirmle());
     squirmleList.add(new BodySquirmle(180));
@@ -121,6 +123,8 @@ function startGame(){
     // changes the visible screen to the game screen
     titleScreen.visible = false;
     gameScreen.visible = true;
+
+    foodCount = 0;
 
     // Start update loop
     app.ticker.add(gameLoop);
@@ -222,6 +226,7 @@ function foodFunctions(){
         if (b.hit(headSquirmle, food)) {
             gameScreen.removeChild(food);
             food = new Food();
+            foodCount++;
             gameScreen.addChild(food);
 
             addBodySquirmle();
@@ -233,9 +238,11 @@ function foodFunctions(){
 //to the body of the squirmle
 function addBodySquirmle(){
 
-    let bodySquirmle = new bodySquirmle();
+    /*let bodySquirmle = new bodySquirmle();
     squirmleList.add(bodySquirmle);
-    gameScreen.addChild(bodySquirmle)
+    gameScreen.addChild(bodySquirmle)*/
+}
 
-
+function spawnEnemies(){
+    
 }
