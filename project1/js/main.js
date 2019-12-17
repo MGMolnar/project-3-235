@@ -55,6 +55,10 @@ let left = 3 * Math.PI/2;
 let down = Math.PI;
 let right = Math.PI/2;
 
+let score = 0;
+//text for the score on the end screen
+let textScore;
+
 window.addEventListener("keydown", keysDown);
 window.addEventListener("keyup", keysUp);
 
@@ -100,6 +104,9 @@ function createPages(){
     //a function that will put all the text,
     //objects, or buttons onto the title screen
     settupTitleScreen();
+
+    //function that will settup the end screen
+    settupEndScreen();
 }
 
 
@@ -151,6 +158,49 @@ function settupGameScreen(){
 //onto the end screen
 function settupEndScreen(){
 
+    //creates the death screen text
+    let endText = new PIXI.Text("You have Died");
+    endText.style = new PIXI.TextStyle({
+        fill: 0x00A86B,
+        fontSize: 40,
+        fontFamily: 'Georgia',
+        stroke: 0x000000,
+        strokeThickness: 4
+    })
+    endText.x = 160;
+    endText.y = 100;
+    endScreen.addChild(endText);
+
+    textScore = new PIXI.Text(`Your Final Score: ${score}`);
+    textScore.style = new PIXI.TextStyle({
+        fill: 0x00A86B,
+        fontSize: 40,
+        fontFamily: 'Georgia',
+        stroke: 0x000000,
+        strokeThickness: 4
+    });
+    textScore.x = 125;
+    textScore.y = 300;
+    endScreen.addChild(textScore);
+
+    //creates the button to let the player 
+    //enter the game and start plaing
+    let endButton = new PIXI.Text("Restart Your Journey");
+    endButton.style =  new PIXI.TextStyle({
+        fill: 0x00A86B,
+        fontSize: 40,
+        fontFamily: 'Georgia',
+        stroke: 0x000000,
+        strokeThickness: 4
+    })
+    endButton.interactive = true;
+    endButton.buttonMode = true;
+    endButton.on("pointerup", restartGame);//will call the function to restart the game for the player
+    endButton.on('pointerover', e=> e.target.alpha = .7);
+    endButton.on('pointerour', e=>e.currentTarget.alpha = 1.0);
+    endButton.x = 110;
+    endButton.y = 480;
+    endScreen.addChild(endButton);
 }
 
 //function that starts the game for the player
@@ -170,6 +220,7 @@ function startGame(){
 }
 
 function gameLoop(){
+
     if (babySquirmle != null){
         babySqurmleFunctions(babySquirmle);
     }
@@ -490,7 +541,11 @@ function endGame(){
     endScreen.visible = true;
     gameplayMusic.stop();
     //gameOverSound.play();
-}	
+}
+
+function restartGame(){
+
+}
 
 // we use this to keep the ship on the screen
 function clamp(val, min, max){
