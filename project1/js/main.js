@@ -14,7 +14,7 @@ let stage;
 let keys = {};
 let headSquirmle;
 let current;
-let score;
+let score = 0;
 
 let babySquirmle = null;
 
@@ -55,7 +55,6 @@ let left = 3 * Math.PI/2;
 let down = Math.PI;
 let right = Math.PI/2;
 
-let score = 0;
 //text for the score on the end screen
 let textScore;
 
@@ -126,6 +125,21 @@ function settupTitleScreen(){
     title.x = 120;
     title.y = 120;
     titleScreen.addChild(title);
+
+    //creates the title text
+    let controls = new PIXI.Text("          W A S D - Squirmle Movement " +  
+    "\n         Space - Create a Baby Squirmle " +
+    "\nMouse - moves any created baby squirmles");
+    controls.style = new PIXI.TextStyle({
+        fill: 0x00A86B,
+        fontSize: 20,
+        fontFamily: 'Georgia',
+        stroke: 0x000000,
+        strokeThickness: 4
+    })
+    controls.x = 120;
+    controls.y = 300;
+    titleScreen.addChild(controls);
 
     //creates the button to let the player 
     //enter the game and start plaing
@@ -201,22 +215,6 @@ function settupEndScreen(){
     endButton.x = 110;
     endButton.y = 480;
     endScreen.addChild(endButton);
-}
-
-//function that starts the game for the player
-function startGame(){
-    // changes the visible screen to the game screen
-    titleScreen.visible = false;
-    gameScreen.visible = true;
-
-    foodCount = 0;
-
-    // Start update loop
-    app.ticker.add(gameLoop);
-
-    setInterval(movementBigSquirmle, 100);
-
-    gameplayMusic.play();
 }
 
 function gameLoop(){
@@ -540,12 +538,32 @@ function endGame(){
     gameScreen.visible = false;
     endScreen.visible = true;
     gameplayMusic.stop();
+    babySound.stop();
+    eatSound.stop();
     //gameOverSound.play();
 }
 
 function restartGame(){
-
+    startGame();
 }
+
+//function that starts the game for the player
+function startGame(){
+    // changes the visible screen to the game screen
+    titleScreen.visible = false;
+    gameScreen.visible = true;
+    endScreen.visible = false;
+
+    foodCount = 0;
+
+    // Start update loop
+    app.ticker.add(gameLoop);
+
+    setInterval(movementBigSquirmle, 100);
+
+    gameplayMusic.play();
+}
+
 
 // we use this to keep the ship on the screen
 function clamp(val, min, max){
