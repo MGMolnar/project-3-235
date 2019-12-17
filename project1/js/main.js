@@ -3,6 +3,9 @@
 const app = new PIXI.Application(600,600);
 document.body.appendChild(app.view);
 
+const sceneWidth = app.view.width;
+const sceneHeight = app.view.height;
+
 let titleScreen;
 let endScreen;
 let gameScreen;
@@ -10,6 +13,8 @@ let controlScreen;
 let stage;
 let keys = {};
 let headSquirmle;
+
+let babySquirmle = null;
 
 let foodCount = 0;
 let food = null;
@@ -147,6 +152,12 @@ function startGame(){
 }
 
 function gameLoop(){
+    if (babySquirmle != null){
+        babySqurmleFunctions(babySquirmle);
+    }
+
+    wallCollision();
+    
     foodFunctions();
 
     spawnEnemies();
@@ -189,8 +200,12 @@ function movementBigSquirmle(){
     else if (keys["68"] && headSquirmle.prevRotation != left){ // D
         headSquirmle.rotation = right;
     }
-    else if(keys["32"]){ // Spacebar
+    else if(keys["32"] && babySquirmle == null){ // Spacebar
         squirmleList.poop();
+        
+        babySquirmle = new BabySquirmle(headSquirmle.x, headSquirmle.y);
+        gameScreen.addChild(babySquirmle);
+
         squirmleList.tail.element.texture = spriteTailLeft;
     }
 
@@ -325,7 +340,6 @@ function foodFunctions(){
 function addBodySquirmle(){
     let bodySquirmle = new BodySquirmle();
     squirmleList.add(bodySquirmle);
-    gameScreen.addChild(bodySquirmle);
 }
 
 //function that will spawn more enemies 
@@ -386,8 +400,79 @@ function enemyFunctions(){
     });
 }
 
+//function that will move the baby squirmle,
+//check to see if it collides with an enemy
+//and any other functions
+function babySqurmleFunctions(bodySquirmle){
+
+    //gets the mouse position in the game screen
+    let mousePosition = app.renderer.plugins.interaction.mouse.global;
+
+    //gets the delta time of the game 
+    let deltaTime = 1/app.ticker.FPS;
+    if(deltaTime > 1/32) deltaTime = 1/32;
+    let amt = 6 * deltaTime;
+
+    //creates the new x and y positions using 
+    //linear interpolate
+    let newX = bodySquirmle.x * (1-amt) + amt * mousePosition.x;
+    let newY = bodySquirmle.y * (1-amt) + amt * mousePosition.y;
+
+    //gets the heiht and width of the squrimle
+    let w2 = bodySquirmle.width/2;
+    let h2 = bodySquirmle.height/2;
+
+    //clamps the squirmle to inside of the scene
+    bodySquirmle.x = clamp(newX, 0+w2, sceneWidth-w2);
+    bodySquirmle.y = clamp(newY, 0+h2, sceneHeight-h2)
+
+    //for loop that will go through the enemies and check to see
+    //if there is a collision with the babysqurimle
+    for (let i = 0; i < enemyList.length; i++) {
+
+        //if there is a collision remove both the 
+        //baby squrimle and the enemy from the game
+        if (b.hit(bodySquirmle, enemyList[i])) {
+
+            gameScreen.removeChild(babySquirmle);
+            babySquirmle = null;
+            gameScreen.removeChild(enemyList[i]);
+            enemyList[i] = null
+
+        }
+    }
+    
+}
+
+//function that will check to see 
+//the headsquirmle is outside the scene bounds
+function wallCollision(){
+
+    //headsquirmle x position is too high
+    if (headSquirmle.x > sceneWidth) {
+        endGame();
+    }
+    //headsqurmle x position too low
+    else if (headSquirmle.x < 0) {
+        endGame();
+    }
+    //headsquirmle y position is too high
+    else if (headSquirmle.y > sceneHeight) {
+        endGame();
+    }
+    //headsquirmle y position is too low
+    else if (headSquirmle.y < 0) {
+        endGame();
+    }
+}
+
 //sets the endscreen to be visible
 function endGame(){
     gameScreen.visible = false;
     endScreen.visible = true;
+}	
+
+// we use this to keep the ship on the screen
+function clamp(val, min, max){
+    return val < min ? min : (val > max ? max : val);
 }

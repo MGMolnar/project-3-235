@@ -9,6 +9,7 @@ class BodySquirmle extends PIXI.Sprite{
         this.rotation = rotation;
         this.prevRotation = rotation;
         this.imageRotation = rotation;
+        this.movement = false;
     }
 }
 
@@ -18,6 +19,8 @@ class Node {
         this.element = element; 
         this.next = null;
         this.prev = null;
+        this.x = element.x;
+        this.y = element.y;
     } 
 } 
 
@@ -73,7 +76,7 @@ class Food extends PIXI.Graphics{
     constructor(x = 0, y = 0, color = 0xFFFFFF){
         super();
         this.beginFill(color);
-        this.drawRect(-2, -2, 4, 6);
+        this.drawRect(-4, -4, 12, 12);
         this.endFill();
         this.x = parseInt(Math.random() * 500);
         this.y = parseInt(Math.random() * 500);
@@ -84,11 +87,23 @@ class EnemySquirmle extends PIXI.Graphics{
     constructor(x = 250, y = 250, color = 0x00FF00){
         super();
         this.beginFill(color);
-        this.drawRect(-2, -2, 6, 6);
+        this.drawRect(-2, -2, 18, 18);
         this.endFill();
         this.x = parseInt(Math.random() * 500);
         this.y = parseInt(Math.random() * 500);
 
+    }
+}
+
+class BabySquirmle extends PIXI.Graphics{
+    constructor(x, y, color= 0xadd8e6){
+        //super(PIXI.Texture.from(texture));
+        super();
+        this.beginFill(color);
+        this.drawRect(0, 0, 18, 18);
+        this.endFill();
+        this.x = x;
+        this.y = y;
     }
 }
 
