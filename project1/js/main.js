@@ -301,19 +301,19 @@ function spawnEnemies(){
 function enemyFunctions(){
     enemyList.forEach(enemy => {
         if (enemy.x - headSquirmle.x < 0) {
-            enemy.x += 1;
+            enemy.x += .5;
         }
 
         if (enemy.x - headSquirmle.x > 0) {
-            enemy.x -= 1;
+            enemy.x -= .5;
         }
 
         if (enemy.y - headSquirmle.y < 0) {
-            enemy.y += 1;
+            enemy.y += .5;
         }
 
         if (enemy.y - headSquirmle.y > 0) {
-            enemy.y -= 1;
+            enemy.y -= .5;
         }
 
         if (b.hit(headSquirmle, enemy)) {
