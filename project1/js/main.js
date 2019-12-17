@@ -13,6 +13,8 @@ let controlScreen;
 let stage;
 let keys = {};
 let headSquirmle;
+let current;
+let score;
 
 let babySquirmle = null;
 
@@ -31,8 +33,22 @@ let spriteRightToBot = PIXI.Texture.fromImage("media/rightToBot.png");
 let spriteLeftToUp = PIXI.Texture.fromImage("media/leftToUp.png");
 let spriteLeftToBot = PIXI.Texture.fromImage("media/leftToBot.png");
 let spriteBody = PIXI.Texture.fromImage("media/squirmleBody.png");
+let spriteEmpty = PIXI.Texture.fromImage("media/empty.png");
 
 let enemyList = [];
+
+let eatSound = new Howl({
+    src: ['media/eating.wav']
+});
+let babySound = new Howl({
+    src: ['media/babySpawn.FLAC']
+});
+let gameOverSound = new Howl({
+    src: ['media/gameOver.WAV']
+});
+let gameplayMusic = new Howl({
+    src: ['media/playMusic.WAV']
+});
 
 let up = 0;
 let left = 3 * Math.PI/2;
@@ -149,6 +165,8 @@ function startGame(){
     app.ticker.add(gameLoop);
 
     setInterval(movementBigSquirmle, 100);
+
+    gameplayMusic.play();
 }
 
 function gameLoop(){
@@ -157,6 +175,8 @@ function gameLoop(){
     }
 
     wallCollision();
+
+    selfCollision();
     
     foodFunctions();
 
@@ -164,19 +184,6 @@ function gameLoop(){
 
     enemyFunctions();
 }
-
-/*function gameLoop(){
-	//if (paused) return; // keep this commented out for now
-	
-	// #1 - Calculate "delta time"
-    //let dt = 1/app.ticker.FPS;
-    //if (dt > 1/30) dt=1/30;
-
-    // Likely going to exclude the movementBigSquirmle() from the
-    // game loop to make it look like a staggered movement
-    // where as communist shit will just roam around freely updating every frame
-    //movementBigSquirmle();
-}*/
 
 function movementBigSquirmle(){
     // Track all of the head's direction and coordinates from the previous frame to the current
@@ -201,6 +208,9 @@ function movementBigSquirmle(){
         headSquirmle.rotation = right;
     }
     else if(keys["32"] && babySquirmle == null){ // Spacebar
+        babySound.play();
+
+        squirmleList.tail.element.texture = spriteEmpty;
         squirmleList.poop();
         
         babySquirmle = new BabySquirmle(headSquirmle.x, headSquirmle.y);
@@ -224,7 +234,7 @@ function movementBigSquirmle(){
     }
 
     // Move each body part to the previous location of the body part in front of it
-    let current = squirmleList.head.next;
+    current = squirmleList.head.next;
     while(current != null){
         // Move the body part
         current.element.prevX = current.element.x;
@@ -240,9 +250,9 @@ function movementBigSquirmle(){
     }
 
     current = squirmleList.head.next;
-    // Change sprite rotations of the rest of the body
+    // Change sprite of each body part if they are changing directions AKA a corner is formed
     while(current != null){
-        if(current.next != null){
+        if(current.next != null){ 
             if((current.next.element.x - current.element.x == -20 && 
                 current.element.x - current.prev.element.x == 0 && 
                 current.element.y - current.prev.element.y == 20) || 
@@ -283,7 +293,7 @@ function movementBigSquirmle(){
                 current.element.texture = spriteBody;
             }
         }
-        else {
+        else { // This is to change the tail's rotation to fit right
             if(current.prev.element.imageRotation % (2 * Math.PI) == up){
                 current.element.texture = spriteTailRight;
             }
@@ -297,8 +307,6 @@ function movementBigSquirmle(){
                 current.element.texture = spriteTailBot;
             }
         }
-            
-
         current = current.next;
     }
 }
@@ -325,6 +333,7 @@ function foodFunctions(){
     //if there is a collision remove that food and create a new food 
     else if (food != null) {
         if (b.hit(headSquirmle, food)) {
+            eatSound.play();
             gameScreen.removeChild(food);
             food = new Food();
             foodCount++;
@@ -340,6 +349,7 @@ function foodFunctions(){
 function addBodySquirmle(){
     let bodySquirmle = new BodySquirmle();
     squirmleList.add(bodySquirmle);
+    gameScreen.addChild(bodySquirmle);
 }
 
 //function that will spawn more enemies 
@@ -380,23 +390,18 @@ function enemyFunctions(){
         if (enemy.x - headSquirmle.x < 0) {
             enemy.x += .5;
         }
-
         if (enemy.x - headSquirmle.x > 0) {
             enemy.x -= .5;
         }
-
         if (enemy.y - headSquirmle.y < 0) {
             enemy.y += .5;
         }
-
         if (enemy.y - headSquirmle.y > 0) {
             enemy.y -= .5;
         }
-
         if (b.hit(headSquirmle, enemy)) {
             endGame();
         }
-
     });
 }
 
@@ -433,7 +438,7 @@ function babySqurmleFunctions(bodySquirmle){
         //if there is a collision remove both the 
         //baby squrimle and the enemy from the game
         if (b.hit(bodySquirmle, enemyList[i])) {
-
+            babySound.stop();
             gameScreen.removeChild(babySquirmle);
             babySquirmle = null;
             gameScreen.removeChild(enemyList[i]);
@@ -466,10 +471,25 @@ function wallCollision(){
     }
 }
 
+function selfCollision(){
+
+    current = squirmleList.head.next;
+    while(current != null){
+        if(current.element.x == squirmleList.head.element.x && current.element.y == squirmleList.head.element.y){
+            endGame();
+        }
+
+        current = current.next;
+    }
+}
+
 //sets the endscreen to be visible
 function endGame(){
+    
     gameScreen.visible = false;
     endScreen.visible = true;
+    gameplayMusic.stop();
+    //gameOverSound.play();
 }	
 
 // we use this to keep the ship on the screen
