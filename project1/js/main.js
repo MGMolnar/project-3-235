@@ -155,6 +155,8 @@ function gameLoop(){
         babySqurmleFunctions(babySquirmle);
     }
 
+    wallCollision();
+
     foodFunctions();
 
     spawnEnemies();
@@ -374,7 +376,27 @@ function babySqurmleFunctions(bodySquirmle){
     
 }
 
+//function that will check to see 
+//the headsquirmle is outside the scene bounds
+function wallCollision(){
 
+    //headsquirmle x position is too high
+    if (headSquirmle.x > sceneWidth) {
+        endGame();
+    }
+    //headsqurmle x position too low
+    else if (headSquirmle.x < 0) {
+        endGame();
+    }
+    //headsquirmle y position is too high
+    else if (headSquirmle.y > sceneHeight) {
+        endGame();
+    }
+    //headsquirmle y position is too low
+    else if (headSquirmle.y < 0) {
+        endGame();
+    }
+}
 
 //sets the endscreen to be visible
 function endGame(){
