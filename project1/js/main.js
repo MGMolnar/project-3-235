@@ -9,7 +9,6 @@ let gameScreen;
 let controlScreen;
 let stage;
 let keys = {};
-let keysDiv;
 let headSquirmle;
 
 let foodCount = 0;
@@ -18,7 +17,15 @@ let food = null;
 let b = new Bump(PIXI);
 let squirmleList;
 let spriteHead = PIXI.Texture.fromImage("media/squirmleHead.png");
-let spriteTail = PIXI.Texture.fromImage("media/squirmleTailTest.png");
+let spriteTail = PIXI.Texture.fromImage("media/squirmleTail.png");
+let spriteTailBot = PIXI.Texture.fromImage("media/squirmleTailBot.png");
+let spriteTailRight = PIXI.Texture.fromImage("media/squirmleTailRight.png");
+let spriteTailLeft = PIXI.Texture.fromImage("media/squirmleTailLeft.png");
+let spriteRightToUp = PIXI.Texture.fromImage("media/rightToUp.png");
+let spriteRightToBot = PIXI.Texture.fromImage("media/rightToBot.png");
+let spriteLeftToUp = PIXI.Texture.fromImage("media/leftToUp.png");
+let spriteLeftToBot = PIXI.Texture.fromImage("media/leftToBot.png");
+let spriteBody = PIXI.Texture.fromImage("media/squirmleBody.png");
 
 let enemyList = [];
 
@@ -53,7 +60,7 @@ function createPages(){
     squirmleList.add(new BodySquirmle(160));
     squirmleList.add(new BodySquirmle(140));
     squirmleList.add(new BodySquirmle(120));
-    squirmleList.tail.element.texture = spriteTail;
+    squirmleList.tail.element.texture = spriteTailLeft;
 
     let current = squirmleList.head;
     while(current != null){
@@ -72,8 +79,6 @@ function createPages(){
     //a function that will put all the text,
     //objects, or buttons onto the title screen
     settupTitleScreen();
-
-    keysDiv = document.querySelector("#keys");
 }
 
 
@@ -142,17 +147,11 @@ function startGame(){
 }
 
 function gameLoop(){
-    keysDiv.innerHTML = JSON.stringify(keys);
-    
-    //movementBigSquirmle()
-
     foodFunctions();
 
     spawnEnemies();
 
     enemyFunctions();
-    
-    
 }
 
 /*function gameLoop(){
@@ -171,28 +170,28 @@ function gameLoop(){
 function movementBigSquirmle(){
     // Track all of the head's direction and coordinates from the previous frame to the current
     //headSquirmle = squirmleList.head.element;
-    let prevDirection = headSquirmle.rotation;
+    headSquirmle.prevRotation = headSquirmle.rotation;
     headSquirmle.prevX = headSquirmle.x;
     headSquirmle.prevY = headSquirmle.y;
 
     // Use else if statements as the big squirmle won't be able to move diagonally
     // Also prevent big squirmle from going the opposite direction that it is currently traveling
     // so it won't kill itself
-    if (keys["87"] && prevDirection != down){ // W
+    if (keys["87"] && headSquirmle.prevRotation != down){ // W
         headSquirmle.rotation = up;
     }
-    else if (keys["65"] && prevDirection != right){ // A
+    else if (keys["65"] && headSquirmle.prevRotation != right){ // A
         headSquirmle.rotation = left;
     }
-    else if (keys["83"] && prevDirection != up){ // S
+    else if (keys["83"] && headSquirmle.prevRotation != up){ // S
         headSquirmle.rotation = down;
     }
-    else if (keys["68"] && prevDirection != left){ // D
+    else if (keys["68"] && headSquirmle.prevRotation != left){ // D
         headSquirmle.rotation = right;
     }
     else if(keys["32"]){ // Spacebar
         squirmleList.poop();
-        squirmleList.tail.element.texture = spriteTail;
+        squirmleList.tail.element.texture = spriteTailLeft;
     }
 
     // Move the head's x and y coordinates based on direction facing
@@ -212,10 +211,78 @@ function movementBigSquirmle(){
     // Move each body part to the previous location of the body part in front of it
     let current = squirmleList.head.next;
     while(current != null){
+        // Move the body part
         current.element.prevX = current.element.x;
         current.element.prevY = current.element.y;
         current.element.x = current.prev.element.prevX;
         current.element.y = current.prev.element.prevY;
+
+        // Set rotation of each body part to check for corner sprites
+        current.element.prevRotation = current.element.imageRotation;
+        current.element.imageRotation = current.prev.element.prevRotation;
+
+        current = current.next;
+    }
+
+    current = squirmleList.head.next;
+    // Change sprite rotations of the rest of the body
+    while(current != null){
+        if(current.next != null){
+            if((current.next.element.x - current.element.x == -20 && 
+                current.element.x - current.prev.element.x == 0 && 
+                current.element.y - current.prev.element.y == 20) || 
+                (current.next.element.y - current.element.y == -20 && 
+                current.element.y - current.prev.element.y == 0 && 
+                current.element.x - current.prev.element.x == 20))
+            {
+                current.element.texture = spriteRightToBot;
+            }
+            else if((current.next.element.x - current.element.x == -20 && 
+                current.element.x - current.prev.element.x == 0 && 
+                current.element.y - current.prev.element.y == -20) || 
+                (current.next.element.y - current.element.y == 20 && 
+                current.element.y - current.prev.element.y == 0 && 
+                current.element.x - current.prev.element.x == 20))
+            {
+                current.element.texture = spriteLeftToBot;
+            }
+            else if((current.next.element.x - current.element.x == 20 && 
+                current.element.x - current.prev.element.x == 0 && 
+                current.element.y - current.prev.element.y == 20) || 
+                (current.next.element.y - current.element.y == -20 && 
+                current.element.y - current.prev.element.y == 0 && 
+                current.element.x - current.prev.element.x == -20))
+            {
+                current.element.texture = spriteRightToUp;
+            }
+            else if((current.next.element.x - current.element.x == 20 && 
+                current.element.x - current.prev.element.x == 0 && 
+                current.element.y - current.prev.element.y == -20) || 
+                (current.next.element.y - current.element.y == 20 && 
+                current.element.y - current.prev.element.y == 0 && 
+                current.element.x - current.prev.element.x == -20))
+            {
+                current.element.texture = spriteLeftToUp;
+            }
+            else {
+                current.element.texture = spriteBody;
+            }
+        }
+        else {
+            if(current.prev.element.imageRotation % (2 * Math.PI) == up){
+                current.element.texture = spriteTailRight;
+            }
+            else if(current.prev.element.imageRotation % (2 * Math.PI) == left){
+                current.element.texture = spriteTail;
+            }
+            else if(current.prev.element.imageRotation % (2 * Math.PI) == down){
+                current.element.texture = spriteTailLeft;
+            }
+            else if(current.prev.element.imageRotation % (2 * Math.PI) == right){
+                current.element.texture = spriteTailBot;
+            }
+        }
+            
 
         current = current.next;
     }
@@ -256,7 +323,6 @@ function foodFunctions(){
 //function that will add a body squirmle
 //to the body of the squirmle
 function addBodySquirmle(){
-
     let bodySquirmle = new BodySquirmle();
     squirmleList.add(bodySquirmle);
     gameScreen.addChild(bodySquirmle);
@@ -274,7 +340,7 @@ function spawnEnemies(){
     //then only make one enemy allowed
     if (enemyCount < 1) {
         enemyCount = 1;
-                console.log(enemyCount);
+        //console.log(enemyCount);
     }
     
     //for loop that will create the enemies 
@@ -282,7 +348,7 @@ function spawnEnemies(){
     for (let i = 0; i < enemyCount; i++) {
         let enemy = new EnemySquirmle();
 
-        console.log(enemy);
+        //console.log(enemy);
         
         if (enemyList[i] == null) {
             enemyList[i] = enemy;
@@ -290,9 +356,6 @@ function spawnEnemies(){
             gameScreen.addChild(enemyList[i]);
         }
     }
-
-
-
 }
 
 //function that will go through all the enemies

@@ -7,6 +7,8 @@ class BodySquirmle extends PIXI.Sprite{
         this.prevX = x;
         this.prevY = y;
         this.rotation = rotation;
+        this.prevRotation = rotation;
+        this.imageRotation = rotation;
     }
 }
 
@@ -36,7 +38,7 @@ class LinkedList {
             this.head = node;
             this.tail = node;
         }
-        // Add node before the tail (as tail WILL have a different texture)
+        // Add node 
         else {
             node.prev = this.tail;
             this.tail.next = node;
