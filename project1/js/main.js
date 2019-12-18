@@ -20,6 +20,9 @@ let babySquirmle = null;
 let foodCount = 0;
 let food = null;
 
+let playing = false;
+let playingSquirmle;
+
 let b = new Bump(PIXI);
 let squirmleList;
 let spriteHead = PIXI.Texture.fromImage("media/squirmleHead.png");
@@ -66,6 +69,7 @@ let score = 0;
 let gameScore;
 //text for the score on the end screen
 let textScore;
+let textHighScore;
 
 window.addEventListener("keydown", keysDown);
 window.addEventListener("keyup", keysUp);
@@ -87,7 +91,7 @@ function init(){
 
     storedHighScore = localStorage.getItem(highScoreKey);
     if (storedHighScore){
-        
+        //textHighScore = new PIXI.Text(`Your High Score: ${storedHighScore}`);
     }
 }
 
@@ -108,13 +112,12 @@ function createPages(){
     gameScreen.addChild(gameBackground);
 
     squirmleList = new LinkedList();
-    squirmleList.add(new BodySquirmle(200, 200));
+    squirmleList.add(new BodySquirmle(210, 210));
     headSquirmle = squirmleList.head.element;
     headSquirmle.texture = spriteHead;
-    squirmleList.add(new BodySquirmle(180, 200));
-    squirmleList.add(new BodySquirmle(160, 200));
-    squirmleList.add(new BodySquirmle(140, 200));
-    squirmleList.add(new BodySquirmle(120, 200));
+    squirmleList.add(new BodySquirmle(190, 210));
+    squirmleList.add(new BodySquirmle(170, 210));
+    squirmleList.add(new BodySquirmle(150, 210));
     squirmleList.tail.element.texture = spriteTailBot;
 
     let current = squirmleList.head;
@@ -248,6 +251,18 @@ function settupEndScreen(){
     textScore.y = 300;
     endScreen.addChild(textScore);
 
+    textHighScore = new PIXI.Text(`Your High Score: ${Math.round(localStorage.getItem(highScoreKey))}`);
+    textHighScore.style = new PIXI.TextStyle({
+        fill: 0x00A86B,
+        fontSize: 40,
+        fontFamily: 'Georgia',
+        stroke: 0x000000,
+        strokeThickness: 4
+    });
+    textHighScore.x = 125;
+    textHighScore.y = 380;
+    endScreen.addChild(textHighScore);
+
     //creates the button to let the player 
     //enter the game and start plaing
     let endButton = new PIXI.Text("Restart Your Journey");
@@ -273,23 +288,24 @@ function startGame(){
     // changes the visible screen to the game screen
     titleScreen.visible = false;
     gameScreen.visible = true;
+    endScreen.visible = false;
 
     foodCount = 0;
 
     // Start update loop
     app.ticker.add(gameLoop);
 
-    setInterval(movementBigSquirmle, 100);
+    playing = true;
+
+    playingSquirmle = setInterval(movementBigSquirmle, 100);
 
     gameplayMusic.play();
-
-    
 }
 
 function gameLoop(){
 
     if (babySquirmle != null){
-        babySqurmleFunctions(babySquirmle);
+        babySquirmleFunctions(babySquirmle);
     }
 
     wallCollision();
@@ -336,7 +352,7 @@ function movementBigSquirmle(){
     else if (keys["68"] && headSquirmle.prevRotation != left){ // D
         headSquirmle.rotation = right;
     }
-    else if(keys["32"] && babySquirmle == null){ // Spacebar
+    else if(keys["32"] && babySquirmle == null && squirmleList.size > 3){ // Spacebar
         babySound.play();
 
         squirmleList.tail.element.texture = spriteEmpty;
@@ -555,7 +571,7 @@ function enemyFunctions(){
 //function that will move the baby squirmle,
 //check to see if it collides with an enemy
 //and any other functions
-function babySqurmleFunctions(bodySquirmle){
+function babySquirmleFunctions(bodySquirmle){
 
     //gets the mouse position in the game screen
     let mousePosition = app.renderer.plugins.interaction.mouse.global;
@@ -631,9 +647,12 @@ function selfCollision(){
 
 //sets the endscreen to be visible
 function endGame(){
+    clearInterval(playingSquirmle);
+
     app.ticker.remove(gameLoop);
 
     textScore.text = `Your Final Score: ${Math.round(score)}`;
+    textHighScore.text = `Your High Score: ${Math.round(localStorage.getItem(highScoreKey))}`;
 
     gameScreen.visible = false;
     endScreen.visible = true;
@@ -652,15 +671,44 @@ function endGame(){
     });
     enemyList = [];
 
-    /*for (let i = 0; i < squirmleList.size; i++) {
+    //reset baby
+    babySound.stop();
+    gameScreen.removeChild(babySquirmle);
+    babySquirmle = null;
+
+    // reset the squirmle
+    let size = squirmleList.size
+    for (let i = 0; i < size; i++) {
+        squirmleList.tail.element.texture = spriteEmpty;
         squirmleList.poop();
-    }*/
+    }
+    squirmleList.head.element.texture = spriteEmpty;
+    squirmleList.head = null;
+    squirmleList.tail.element.texture = spriteEmpty;
+    squirmleList.tail = null;
+    squirmleList.size = 0;
 
-    squirmleList = new LinkedList();
+    squirmleList.add(new BodySquirmle(210, 210));
+    headSquirmle = squirmleList.head.element;
+    headSquirmle.texture = spriteHead;
+    squirmleList.add(new BodySquirmle(190, 210));
+    squirmleList.add(new BodySquirmle(170, 210));
+    squirmleList.add(new BodySquirmle(150, 210));
+    squirmleList.add(new BodySquirmle(130, 210));
+    squirmleList.tail.element.texture = spriteTailBot;
 
+    let currently = squirmleList.head;
+    while(currently != null){
+        gameScreen.addChild(currently.element);
+        currently = currently.next;
+    }
+    
+
+    // reset other stats
     gameScreen.removeChild(food);
     food = null;
     foodCount = 0;
+    score = 0;
 }
 
 //sends you back to the start screen
@@ -680,23 +728,6 @@ function enemyCollision(enemy){
             }
         }
     }
-}
-
-//function that starts the game for the player
-function startGame(){
-    // changes the visible screen to the game screen
-    titleScreen.visible = false;
-    gameScreen.visible = true;
-    endScreen.visible = false;
-
-    foodCount = 0;
-
-    // Start update loop
-    app.ticker.add(gameLoop);
-
-    setInterval(movementBigSquirmle, 100);
-
-    gameplayMusic.play();
 }
 
 
