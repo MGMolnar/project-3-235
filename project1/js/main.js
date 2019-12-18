@@ -3,13 +3,15 @@
 const app = new PIXI.Application(600,600);
 document.body.appendChild(app.view);
 
+//gets the bounds of the game view
 const sceneWidth = app.view.width;
 const sceneHeight = app.view.height;
 
+//variables for all the screens
 let titleScreen;
 let endScreen;
 let gameScreen;
-let controlScreen;
+
 let stage;
 let keys = {};
 let headSquirmle;
@@ -17,13 +19,17 @@ let current;
 
 let babySquirmle = null;
 
+//creates the current food
+//and the overall amount of food consumed
 let foodCount = 0;
 let food = null;
 
 let playing = false;
 let playingSquirmle;
 
+//is used for any collisions int he game
 let b = new Bump(PIXI);
+
 let squirmleList;
 let spriteHead = PIXI.Texture.fromImage("media/squirmleHead.png");
 let spriteTail = PIXI.Texture.fromImage("media/squirmleTail.png");
@@ -45,6 +51,7 @@ let titleBackground = new PIXI.Sprite(grass);
 let gameBackground = new PIXI.Sprite(grass);
 let endBackground = new PIXI.Sprite(grass);
 
+//settups the enemy list for the game
 let enemyList = [];
 
 let eatSound = new Howl({
@@ -67,6 +74,7 @@ let right = Math.PI/2;
 
 let score = 0;
 let gameScore;
+
 //text for the score on the end screen
 let textScore;
 let textHighScore;
@@ -104,11 +112,12 @@ function createPages(){
     titleScreen = new PIXI.Container();
     stage.addChild(titleScreen);
 
+    //creates the game screen and sets it to be invisible
     gameScreen = new PIXI.Container();
     gameScreen.visible = false;
     stage.addChild(gameScreen);
 
-    
+    //creates the background on the gamescreen to be visible
     gameScreen.addChild(gameBackground);
 
     squirmleList = new LinkedList();
@@ -125,11 +134,8 @@ function createPages(){
         gameScreen.addChild(current.element);
         current = current.next;
     }
-    
-    controlScreen = new PIXI.Container();
-    controlScreen.visible = false;
-    stage.addChild(controlScreen);
 
+    //creates the end screen and sets it to be invisible
     endScreen = new PIXI.Container();
     endScreen.visible = false;
     stage.addChild(endScreen);
@@ -138,6 +144,7 @@ function createPages(){
     //objects, or buttons onto the title screen
     settupTitleScreen();
 
+    //function that will add any sort of text to the game  screen
     settupGameScreen();
 
     //function that will settup the end screen
@@ -149,6 +156,7 @@ function createPages(){
 //onto the title screen
 function settupTitleScreen(){
     
+    //adds the background to the title screen
     titleScreen.addChild(titleBackground);
 
     //creates the title text
@@ -164,7 +172,7 @@ function settupTitleScreen(){
     title.y = 120;
     titleScreen.addChild(title);
 
-    //creates the title text
+    //creates the control text on the title screen
     let controls = new PIXI.Text("W, A, S, D - Squirmle Movement " +  
     "\nSpace - Create a Baby Squirmle " +
     "\nMouse - Moves baby squirmles " +
@@ -207,6 +215,7 @@ function settupTitleScreen(){
 //onto the game screen
 function settupGameScreen(){
 
+    //sets the game score text to be 0 in the upper left hand corner
     gameScore = new PIXI.Text("Score: 0");
     gameScore.style =  new PIXI.TextStyle({
         fill: 0x00A86B,
@@ -224,6 +233,7 @@ function settupGameScreen(){
 //onto the end screen
 function settupEndScreen(){
     
+    //adds the background to the end screen
     endScreen.addChild(endBackground);
 
     //creates the death screen text
@@ -239,6 +249,7 @@ function settupEndScreen(){
     endText.y = 100;
     endScreen.addChild(endText);
 
+    //text that displays the final score onto the end screen
     textScore = new PIXI.Text(`Your Final Score: ${score}`);
     textScore.style = new PIXI.TextStyle({
         fill: 0x00A86B,
@@ -263,8 +274,8 @@ function settupEndScreen(){
     textHighScore.y = 380;
     endScreen.addChild(textHighScore);
 
-    //creates the button to let the player 
-    //enter the game and start plaing
+    //creates a button that will reset the game and 
+    //put the player back at the title screen
     let endButton = new PIXI.Text("Restart Your Journey");
     endButton.style =  new PIXI.TextStyle({
         fill: 0x00A86B,
@@ -302,20 +313,33 @@ function startGame(){
     gameplayMusic.play();
 }
 
+//function that works as the game loop for the game
 function gameLoop(){
 
+    //checks to see if there is a baby squirmle
+    //if not use the baby squirmle functions
     if (babySquirmle != null){
         babySquirmleFunctions(babySquirmle);
     }
 
+    //function that will test to 
+    //see if the big squirmle is outside the bounds
+    //of the screen
     wallCollision();
 
+    //function that will see
+    //if the big squirmle collides with itself
     selfCollision();
     
+    //function for any of the functions
+    //that the food will need
     foodFunctions();
 
+    //function that will spawn enemies
     spawnEnemies();
 
+    //function that is used for
+    //all of the uses that enemies have in game
     enemyFunctions();
 
     score += 0.01;
@@ -547,14 +571,16 @@ function spawnEnemies(){
 
 //function that will go through all the enemies
 //let them move and checks to see if there is a
-//collision
+//collision between the head squirmle and an enemy
 function enemyFunctions(){
     enemyList.forEach(enemy => {
         if (enemy.x - headSquirmle.x < 0) {
             enemy.x += .5;
+
         }
         if (enemy.x - headSquirmle.x > 0) {
             enemy.x -= .5;
+
         }
         if (enemy.y - headSquirmle.y < 0) {
             enemy.y += .5;
@@ -565,6 +591,16 @@ function enemyFunctions(){
         if (b.hit(headSquirmle, enemy)) {
             endGame();
         }
+        
+        //gets the vector between the enemy and headsquirmle for both
+        //x and y directions
+        let directionX = enemy.x - headSquirmle.x;
+        let directionY = enemy.y - headSquirmle.y;
+        
+        //changes the enemy rotation based on the angle between both the x and y direction
+        //it is in the opposition direction so rotate by 90
+        enemy.rotation = Math.atan2(directionY, directionX) - 90;
+
     });
 }
 
@@ -645,27 +681,37 @@ function selfCollision(){
     }
 }
 
-//sets the endscreen to be visible
+//function that will stop the game
+//and move the player to the end screen
 function endGame(){
     clearInterval(playingSquirmle);
 
+    // removes game loop from ticking
     app.ticker.remove(gameLoop);
 
+    //updates the text score on the final screen with the score from in game
     textScore.text = `Your Final Score: ${Math.round(score)}`;
     textHighScore.text = `Your High Score: ${Math.round(localStorage.getItem(highScoreKey))}`;
 
+    //switches screens to end screen
     gameScreen.visible = false;
     endScreen.visible = true;
 
+    //switches from the game music to
+    //the game over music
     gameplayMusic.stop();
     gameOverSound.play();
 
     if(score > storedHighScore){
         localStorage.setItem(highScoreKey, score);
     }
+
+    //stops any extra sounds going on
     babySound.stop();
     eatSound.stop();
 
+    //removes all enemies from the game
+    //then creates a new fresh enemy list
     enemyList.forEach(enemy => {
         gameScreen.removeChild(enemy);
     });
