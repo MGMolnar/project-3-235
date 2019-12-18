@@ -34,6 +34,11 @@ let spriteLeftToBot = PIXI.Texture.fromImage("media/leftToBot.png");
 let spriteBody = PIXI.Texture.fromImage("media/squirmleBody.png");
 let spriteEmpty = PIXI.Texture.fromImage("media/empty.png");
 
+let grass = PIXI.Texture.fromImage("media/grass.JPG");
+let titleBackground = new PIXI.Sprite(grass);
+let gameBackground = new PIXI.Sprite(grass);
+let endBackground = new PIXI.Sprite(grass);
+
 let enemyList = [];
 
 let eatSound = new Howl({
@@ -96,6 +101,9 @@ function createPages(){
     gameScreen.visible = false;
     stage.addChild(gameScreen);
 
+    
+    gameScreen.addChild(gameBackground);
+
     squirmleList = new LinkedList();
     squirmleList.add(new BodySquirmle(200, 200));
     headSquirmle = squirmleList.head.element;
@@ -135,6 +143,8 @@ function createPages(){
 //onto the title screen
 function settupTitleScreen(){
     
+    titleScreen.addChild(titleBackground);
+
     //creates the title text
     let title = new PIXI.Text("Squirmle: The Game");
     title.style = new PIXI.TextStyle({
@@ -204,6 +214,8 @@ function settupGameScreen(){
 //will create all the text, buttons, and objects
 //onto the end screen
 function settupEndScreen(){
+    
+    endScreen.addChild(endBackground);
 
     //creates the death screen text
     let endText = new PIXI.Text("You have Died");
@@ -628,11 +640,27 @@ function endGame(){
     }
     babySound.stop();
     eatSound.stop();
-    //gameOverSound.play();
+
+    enemyList.forEach(enemy => {
+        gameScreen.removeChild(enemy);
+    });
+    enemyList = [];
+
+    /*for (let i = 0; i < squirmleList.size; i++) {
+        squirmleList.poop();
+    }*/
+
+    squirmleList = new LinkedList();
+
+    gameScreen.removeChild(food);
+    food = null;
+    foodCount = 0;
 }
 
+//sends you back to the start screen
 function restartGame(){
-    startGame();
+    endScreen.visible = false;
+    titleScreen.visible = true;
 }
 
 //function that will check to see if 
