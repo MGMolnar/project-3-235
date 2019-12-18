@@ -98,7 +98,7 @@ class EnemySquirmle extends PIXI.Graphics{
 class BabySquirmle extends PIXI.Graphics{
     constructor(x, y, color= 0xadd8e6){
         //super(PIXI.Texture.from(texture));
-        super();
+        super();f
         this.beginFill(color);
         this.drawRect(0, 0, 18, 18);
         this.endFill();

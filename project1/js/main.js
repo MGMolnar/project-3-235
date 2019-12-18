@@ -148,6 +148,21 @@ function settupTitleScreen(){
     title.y = 120;
     titleScreen.addChild(title);
 
+    //creates the title text
+    let controls = new PIXI.Text("          W A S D - Squirmle Movement " +  
+    "\n         Space - Create a Baby Squirmle " +
+    "\nMouse - moves any created baby squirmles");
+    controls.style = new PIXI.TextStyle({
+        fill: 0x00A86B,
+        fontSize: 20,
+        fontFamily: 'Georgia',
+        stroke: 0x000000,
+        strokeThickness: 4
+    })
+    controls.x = 120;
+    controls.y = 300;
+    titleScreen.addChild(controls);
+
     //creates the button to let the player 
     //enter the game and start plaing
     let titleButton = new PIXI.Text("Start Your Journey");
@@ -271,6 +286,14 @@ function gameLoop(){
 
     score += 0.01;
     gameScore.text = `Score: ${Math.round(score)}`;
+    //for each loop that will go through all 
+    //the enemies and then have them check their
+    //collision with other enemies
+    enemyList.forEach(enemy => {
+        if (enemy != undefined) {
+            enemyCollision(enemy);    
+        }
+    });
 }
 
 function movementBigSquirmle(){
@@ -603,11 +626,45 @@ function endGame(){
     if(score > storedHighScore){
         localStorage.setItem(highScoreKey, score);
     }
+    babySound.stop();
+    eatSound.stop();
+    //gameOverSound.play();
 }
 
 function restartGame(){
-
+    startGame();
 }
+
+//function that will check to see if 
+//one enemy is colliding with any others
+//if they do then have them move away from the colliding enemy
+function enemyCollision(enemy){
+    for (let i = 0; i < enemyList.length; i++) {
+        if (enemy != enemyList[i] && enemyList[i] != undefined){
+            if(b.hit(enemy, enemyList[i])) {
+                enemy.x += enemy.x - enemyList[i].x;
+            }
+        }
+    }
+}
+
+//function that starts the game for the player
+function startGame(){
+    // changes the visible screen to the game screen
+    titleScreen.visible = false;
+    gameScreen.visible = true;
+    endScreen.visible = false;
+
+    foodCount = 0;
+
+    // Start update loop
+    app.ticker.add(gameLoop);
+
+    setInterval(movementBigSquirmle, 100);
+
+    gameplayMusic.play();
+}
+
 
 // we use this to keep the ship on the screen
 function clamp(val, min, max){
