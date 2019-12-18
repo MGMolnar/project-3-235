@@ -83,12 +83,13 @@ class Food extends PIXI.Graphics{
     }
 }
 
-class EnemySquirmle extends PIXI.Graphics{
+class EnemySquirmle extends PIXI.Sprite{
     constructor(x = -10, y = -10, color = 0x00FF00){
-        super();
-        this.beginFill(color);
-        this.drawRect(-2, -2, 18, 18);
-        this.endFill();
+        super(PIXI.Texture.from("media/enemySquirmle.png"));
+        //this.beginFill(color);
+        //this.drawRect(-2, -2, 18, 18);
+        //this.endFill();
+        this.anchor.set(.5, .5);
         this.x = x;
         this.y = y;
 
@@ -97,8 +98,8 @@ class EnemySquirmle extends PIXI.Graphics{
 
 class BabySquirmle extends PIXI.Graphics{
     constructor(x, y, color= 0xadd8e6){
-        //super(PIXI.Texture.from(texture));
-        super();f
+        //super(PIXI.Texture.from (texture));
+        super();
         this.beginFill(color);
         this.drawRect(0, 0, 18, 18);
         this.endFill();
