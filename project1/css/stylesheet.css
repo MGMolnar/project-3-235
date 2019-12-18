@@ -88,10 +88,10 @@ h2 {
     width: 100%;
     border-bottom: 5px solid #1d2b36;
 }
-
 canvas{
-    margin-right: 30em;
-    margin-left: 30em;
+    display: flex;
+    justify-content: center;
+    margin: auto;
 }
 @media screen and (min-width: 1000px) {
     .proposalgrid {
@@ -150,4 +150,11 @@ footer > p {
 .links > a:hover , .links > a:active {
     text-decoration: none;
     color: #cccccc;
+}
+dl, dt, dd {
+    color: #cccccc;
+}
+.app {  
+    display: flex;
+    justify-content: center;
 }

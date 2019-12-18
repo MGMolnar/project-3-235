@@ -38,16 +38,21 @@
             <div id="left-documentation">
                 <img class="documentation-images" src="media/findsource.jpg" alt="Looking for a document"/>
                 <div class="documentation-text">
-                    <h2>Process</h2>
+                    <h2>Website and Game Pitch Process</h2>
                     <p>I started with creating the game treatment and went with a game that seems possible to do in a short amount of time so I wanted to do Snake but with a twist. This twist involves more movement as you control a second character at times and actually have an enemy rather than only running into yourself.</p>
                     <p>On the website, I started with the navigation bar then worked my way through the proposal page, applying as much information as possible. Soon after I made my home page act like a hook in a funny way to attract people to play. Then I worked on my documentation last as I'm writing this now.</p>
                     <p>It also took me 2 hours to realize I could anchor a whole div, thinking it would be invalid. Nope. That's how I got the navigation bar to look and act the way it is now.</p>
+                    <h2>Making the Game (with Marc Molnar!)</h2>
+                    <p>We took our game idea and hashed out the most important mechanics to our game. Those mechanics were: growing your squirmle by eating food, using your body length to spawn baby squirmles, and using baby squirmles to attack the enemy squirmles.</p>
+                    <p>With these mechanics in mind we set out to create the controls in the game for our mechanics. We early on realized that we wanted to have you control the big squirmle with WASD keys and the baby squirmle with the mouse. This helped keep our game from being too easy and created a complexity to our game. We used a linked list to track the position and rotation of each body part to properly put sprites in the right place and to make sure the movement looks fluid. </p>
+                    <p>We also wanted to limit how much food could be on the screen at once so we kept that down to only one food per screen. To create the squirmle to shrink and grow we created a linked ist that would hold each section of the big squirmle. </p>
+                    <p>Next onto the enemies, we wanted the enemies to be smaller and slower in comparison to the big squirmle. Due to the size of the enemies we thought that it was only right that a player would lose if and only if an enemy hit the head of the big squirmle. The enemies scaled off of how much food the player has ate. A big problem we found out is that the enemies would overlap each other when the big squirmle keeps circling around them so to combat this, we detected if two enemies collide and forced them to move in the opposite direction this made it so they could not overlap and instead create a bigger obstacle.</p>
                 </div>
             </div>
             <div id="right-documentation">
                 <img class="documentation-images" src="media/tree.png" alt="A book with a tree of information"/>
                 <div class="documentation-text">
-                    <h2>Sources</h2>
+                    <h2>Website Sources</h2>
                     <ul>
                         <li class="links"><a href="https://66.media.tumblr.com/94955b73e9aaef4188becdba5da13508/tumblr_plhx2wWouY1ughv8g_640.png">Blue Squirmle Pic</a></li>
                         <li class="links"><a href="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Hammer_and_sickle_red_on_transparent.svg/1200px-Hammer_and_sickle_red_on_transparent.svg.png">Communism Pic</a></li>
@@ -57,6 +62,59 @@
                         <li class="links"><a href="https://assetsds.cdnedge.bluemix.net/sites/default/files/styles/big_2/public/feature/images/combatting_bank_loan.jpg?itok=bAH7OB_o">Process Pic</a></li>
                         <li class="links"><a href="https://sokogskriv.no/wp-content/uploads/2019/05/illustrasjoner_kildehenvisning_500x450.png">Sources Pic</a></li>
                     </ul>
+                    <h2>Game Sources</h2>
+                    <ul>
+                        <li class="links"><a href="https://github.com/kittykatattack/bump">Collision Detection</a></li>
+                        <li class="links"><a href="https://github.com/goldfire/howler.js">Audio</a></li>
+                        <li class="links"><a href="https://github.com/pixijs/pixi.js?utm_source=html5weekly">Visuals and Game Creation</a></li>
+                        <li class="links"><a href="https://www.textures.com/">Grass texture</a></li>
+                        <li class="links"><a href="https://www.html5gamedevs.com/topic/13784-full-screen-background-image/">PixiJs</a></li>
+                        <li class="links"><a href="https://freesound.org/people/djgriffin/sounds/172561/">Music</a></li>
+                        <li class="links"><a href="https://freesound.org/people/deleted_user_877451/sounds/76376/">Game Over Sound</a></li>
+                        <li class="links"><a href="https://freesound.org/people/videog/sounds/149191/">Baby Squirmle Sound</a></li>
+                        <li class="links"><a href="https://freesound.org/people/InspectorJ/sounds/412068/">Eating Sound</a></li>
+                    </ul>
+                    <h2>Nick Malone's Work</h2>
+                    <dl>
+                        <dt>Big Squirmle</dt>
+                        <dd>Shrinking and growing</dd>
+                        <dd>Movement</dd>
+                        <dd>Self collision detection</dd>
+                        <dd>Sprite animation</dd>
+                        <dt>Textures</dt>
+                        <dd>Created all custom pixel art textures for the game</dd>
+                        <dd>Replacing left behind sprites with empty images as that was a weird bug</dd>
+                        <dt>Local Storage</dt>
+                        <dd>High scores tracked and displayed on end screen</dd>
+                        <dt>Enemies</dt>
+                        <dd>Spawning outside the map instead of inside the playing field</dd>
+                        <dt>Scoring</dt>
+                        <dd>Created scoring system and display current score as well as score at the end of the game, including high score.</dd>
+                        <dt>Sound</dt>
+                        <dd>Implement sounds and music</dd>
+                        <dt>Restarting Game</dt>
+                        <dd>Reworked end game method to clear the linked list and not leave behind weird bugs</dd>
+                    </dl>
+                    <h2>Marc Molnar's Work</h2>
+                    <dl>
+                        <dt>Food</dt>
+                        <dd>Spawning in food and limiting it to one only</dd>
+                        <dd>Collision with big squirmle and food</dd>
+                        <dd>Once food is eaten, add it to the big squirmle</dd>
+                        <dt>Enemies</dt>
+                        <dd>Collision with each other, forcing them to be in a flock rather than overlapping</dd>
+                        <dd>Collision with big squirmle</dd>
+                        <dd>Movement to go towards the big squirmle's head</dd>
+                        <dd>Rotation based on big squirmle's head location</dd>
+                        <dt>Title Screen</dt>
+                        <dd>Created the text and buttons that show up on the title screen</dd>
+                        <dt>End Screen</dt>
+                        <dd>Created the text and buttons that show up on the end screen</dd>
+                        <dt>Collision With Wall</dt>
+                        <dd>Made it so that players lose when hitting the wall</dd>
+                        <dt>Restarting Game</dt>
+                        <dd>Created some of the code that restarts the game</dd>
+                    </dl>
                 </div>
             </div>
         </div>

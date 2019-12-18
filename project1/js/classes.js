@@ -1,5 +1,5 @@
 class BodySquirmle extends PIXI.Sprite{
-    constructor(x = -210, y = -210, rotation = Math.PI/2, texture = "media/squirmleTest.png"){
+    constructor(x = -210, y = -210, rotation = Math.PI/2, texture = "media/squirmleBody.png"){
         super(PIXI.Texture.from(texture));
         this.anchor.set(.5, .5);
         this.x = x;
@@ -8,13 +8,13 @@ class BodySquirmle extends PIXI.Sprite{
         this.prevY = y;
         this.rotation = rotation;
         this.prevRotation = rotation;
-        this.imageRotation = rotation;
-        this.movement = false;
+        // This doesn't actually rotate anything, it's basically a temporary variable
+        // that's useful for the tail
+        this.imageRotation = rotation; 
     }
 }
 
 class Node { 
-    // constructor 
     constructor(element) { 
         this.element = element; 
         this.next = null;
@@ -30,19 +30,14 @@ class LinkedList {
         this.tail = null;
         this.size = 0; 
     } 
-  
-    // functions to be implemented 
-    // add(element) 
     add(element) { 
         let node = new Node(element);
 
-        // Add head if empty
-        if(this.head == null){
+        if(this.head == null){ // Add head if empty
             this.head = node;
             this.tail = node;
         }
-        // Add node 
-        else {
+        else { // Add node 
             node.prev = this.tail;
             this.tail.next = node;
             this.tail = node;
@@ -50,6 +45,7 @@ class LinkedList {
         this.size++; 
     } 
     poop(){
+        // Restrict pooping if all that is left is the head and tail
         if(this.size != 2){
             this.tail = this.tail.prev;
             this.tail.next = null;
@@ -57,53 +53,30 @@ class LinkedList {
             this.size--;
         }
     }
-    
-    // Helper Methods 
-    // isEmpty 
-    // size_Of_List 
-    // PrintList 
-    printList() 
-    { 
-        let curr = this.head; 
-        let str = ""; 
-        while (curr) { 
-            str += curr.element + " "; 
-            curr = curr.next; 
-        } 
-        console.log(str); 
-    }
 }
 
 class Food extends PIXI.Sprite{
     constructor(x = 0, y = 0){
         super(PIXI.Texture.from("media/eyes.png"));
-        //this.beginFill(color);
-        //this.drawRect(-4, -4, 12, 12);
-        //this.endFill();
-        this.x = parseInt(Math.random() * 500);
-        this.y = parseInt(Math.random() * 500);
+        this.anchor.set(.5, .5);
+        this.x = Math.round(parseInt(Math.random() * 30)) * 20 + 10;
+        this.y = Math.round(parseInt(Math.random() * 30)) * 20 + 10;
     }
 }
 
 class EnemySquirmle extends PIXI.Sprite{
     constructor(x = -10, y = -10){
         super(PIXI.Texture.from("media/enemySquirmle.png"));
-        //this.beginFill(color);
-        //this.drawRect(-2, -2, 18, 18);
-        //this.endFill();
         this.anchor.set(.5, .5);
         this.x = x;
         this.y = y;
-
     }
 }
 
 class BabySquirmle extends PIXI.Sprite{
     constructor(x, y){
         super(PIXI.Texture.from("media/baby.png"));
-        //this.beginFill(color);
-        //this.drawRect(0, 0, 18, 18);
-        //this.endFill();
+        this.anchor.set(.5, .5);
         this.x = x;
         this.y = y;
     }

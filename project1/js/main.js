@@ -1,37 +1,43 @@
 "use strict";
 
+// Size of our PIXI application
 const app = new PIXI.Application(600,600);
 document.body.appendChild(app.view);
 
-//gets the bounds of the game view
+// Gets the bounds of the game view
 const sceneWidth = app.view.width;
 const sceneHeight = app.view.height;
 
-//variables for all the screens
+// Variables for all the screens
 let titleScreen;
 let endScreen;
 let gameScreen;
 
 let stage;
-let keys = {};
-let headSquirmle;
-let current;
 
+// Controls
+let keys = {};
+
+// Track the baby squirmle
 let babySquirmle = null;
 
-//creates the current food
-//and the overall amount of food consumed
+// Creates the current food and the overall amount of food consumed
 let foodCount = 0;
 let food = null;
 
-let playing = false;
+// This is used as a seperate "game loop" that goes every .1 seconds
 let playingSquirmle;
 
-//is used for any collisions int he game
+// Used for any collisions in the game
 let b = new Bump(PIXI);
 
+// Linked List and helper variables
 let squirmleList;
+let headSquirmle; 
+let current;
+
 let spriteHead = PIXI.Texture.fromImage("media/squirmleHead.png");
+let spriteBody = PIXI.Texture.fromImage("media/squirmleBody.png");
 let spriteTail = PIXI.Texture.fromImage("media/squirmleTail.png");
 let spriteTailBot = PIXI.Texture.fromImage("media/squirmleTailBot.png");
 let spriteTailRight = PIXI.Texture.fromImage("media/squirmleTailRight.png");
@@ -40,86 +46,78 @@ let spriteRightToUp = PIXI.Texture.fromImage("media/rightToUp.png");
 let spriteRightToBot = PIXI.Texture.fromImage("media/rightToBot.png");
 let spriteLeftToUp = PIXI.Texture.fromImage("media/leftToUp.png");
 let spriteLeftToBot = PIXI.Texture.fromImage("media/leftToBot.png");
-let spriteBody = PIXI.Texture.fromImage("media/squirmleBody.png");
 let spriteEmpty = PIXI.Texture.fromImage("media/empty.png");
 
-//https://www.textures.com/
-let grass = PIXI.Texture.fromImage("media/grass.JPG");
-
+// Set the background of the game
+let grass = PIXI.Texture.fromImage("media/grass.jpg"); //https://www.textures.com/
 //https://www.html5gamedevs.com/topic/13784-full-screen-background-image/
 let titleBackground = new PIXI.Sprite(grass);
 let gameBackground = new PIXI.Sprite(grass);
 let endBackground = new PIXI.Sprite(grass);
 
-//settups the enemy list for the game
-let enemyList = [];
-
+// Sounds
 let eatSound = new Howl({
     src: ['media/eating.wav']
 });
 let babySound = new Howl({
-    src: ['media/babySpawn.FLAC']
+    src: ['media/babySpawn.flac']
 });
 let gameOverSound = new Howl({
-    src: ['media/gameOver.WAV']
+    src: ['media/gameOver.wav']
 });
 let gameplayMusic = new Howl({
-    src: ['media/playMusic.WAV']
+    src: ['media/playMusic.wav']
 });
 
+//settups the enemy list for the game
+let enemyList = [];
+
+// Directional variables used for rotation
 let up = 0;
 let left = 3 * Math.PI/2;
 let down = Math.PI;
 let right = Math.PI/2;
 
+// Track score and display on game screen
 let score = 0;
 let gameScore;
 
-//text for the score on the end screen
+// Text to display on end screen
 let textScore;
 let textHighScore;
 
-window.addEventListener("keydown", keysDown);
-window.addEventListener("keyup", keysUp);
-
+// Local storage variables
 let prefix;
 let highScoreKey;
 let storedHighScore;
 
-window.onload = init;
+window.addEventListener("keydown", keysDown);
+window.addEventListener("keyup", keysUp);
 
 createPages();
 
-
-// Functions
-function init(){
-    // Give each search option a key for storage
-    prefix = "nmm3037-";
-    highScoreKey = prefix + "highScore";
-
-    storedHighScore = localStorage.getItem(highScoreKey);
-    if (storedHighScore){
-        //textHighScore = new PIXI.Text(`Your High Score: ${storedHighScore}`);
-    }
-}
-
 //used to create the four different scenes in the scene.
 function createPages(){
-    
+    // Initialize local storage variables
+    prefix = "nmm3037-";
+    highScoreKey = prefix + "highScore";
+    storedHighScore = localStorage.getItem(highScoreKey);
+
     stage = app.stage;
 
-    //creates the titleScreen and adds it to the stage
+    // Creates the titleScreen and adds it to the stage
     titleScreen = new PIXI.Container();
     stage.addChild(titleScreen);
 
-    //creates the game screen and sets it to be invisible
+    // Creates the game screen and sets it to be invisible
     gameScreen = new PIXI.Container();
     gameScreen.visible = false;
     stage.addChild(gameScreen);
 
-    //creates the background on the gamescreen to be visible
+    // Creates the background on the gamescreen to be visible
     gameScreen.addChild(gameBackground);
 
+    // Create the linked list for the big squirmle
     squirmleList = new LinkedList();
     squirmleList.add(new BodySquirmle(210, 210));
     headSquirmle = squirmleList.head.element;
@@ -129,98 +127,94 @@ function createPages(){
     squirmleList.add(new BodySquirmle(150, 210));
     squirmleList.tail.element.texture = spriteTailBot;
 
+    // Add the body parts to the game scene
     let current = squirmleList.head;
     while(current != null){
         gameScreen.addChild(current.element);
         current = current.next;
     }
 
-    //creates the end screen and sets it to be invisible
+    // Creates the end screen and sets it to be invisible
     endScreen = new PIXI.Container();
     endScreen.visible = false;
     stage.addChild(endScreen);
 
-    //a function that will put all the text,
-    //objects, or buttons onto the title screen
+    // Function that will put all the text, objects, or buttons onto the title screen
     settupTitleScreen();
 
-    //function that will add any sort of text to the game  screen
+    // Function that will add any sort of text to the game  screen
     settupGameScreen();
 
-    //function that will settup the end screen
+    // Function that will settup the end screen
     settupEndScreen();
 }
 
-
-//will create all the text, buttons, and objects
-//onto the title screen
+// Will create all the text, buttons, and objects onto the title screen
 function settupTitleScreen(){
     
-    //adds the background to the title screen
+    // Adds the background to the title screen
     titleScreen.addChild(titleBackground);
 
-    //creates the title text
+    // Creates the title text
     let title = new PIXI.Text("Squirmle: The Game");
     title.style = new PIXI.TextStyle({
-        fill: 0x00A86B,
-        fontSize: 40,
-        fontFamily: 'Georgia',
+        fill: 0x00828C,
+        fontSize: 60,
+        fontFamily: 'Arial',
         stroke: 0x000000,
         strokeThickness: 4
     })
-    title.x = 120;
-    title.y = 120;
+    title.x = 20;
+    title.y = 50;
     titleScreen.addChild(title);
 
-    //creates the control text on the title screen
+    // Creates the control text on the title screen
     let controls = new PIXI.Text("W, A, S, D - Squirmle Movement " +  
     "\nSpace - Create a Baby Squirmle " +
     "\nMouse - Moves baby squirmles " +
+    "\n" +
     "\nAvoid the enemy squirmles");
     controls.style = new PIXI.TextStyle({
-        fill: 0x00A86B,
-        fontSize: 30,
-        fontFamily: 'Georgia',
+        fill: 0x00828C,
+        fontSize: 35,
+        fontFamily: 'Arial',
         stroke: 0x000000,
         strokeThickness: 4
         
     })
     controls.anchor.set(.5);
-    controls.x = 330;
+    controls.x = 310;
     controls.y = 320;
     titleScreen.addChild(controls);
 
-    //creates the button to let the player 
-    //enter the game and start plaing
+    // Creates the button to let the player enter the game and start plaing
     let titleButton = new PIXI.Text("Start Your Journey");
     titleButton.style =  new PIXI.TextStyle({
-        fill: 0x00A86B,
-        fontSize: 40,
-        fontFamily: 'Georgia',
+        fill: 0x00828C,
+        fontSize: 55,
+        fontFamily: 'Arial',
         stroke: 0x000000,
         strokeThickness: 4
     })
     titleButton.interactive = true;
     titleButton.buttonMode = true;
-    titleButton.on("pointerup", startGame);//will call the function to start the game for the player
+    titleButton.on("pointerup", startGame); // Will call the function to start the game for the player
     titleButton.on('pointerover', e=> e.target.alpha = .7);
     titleButton.on('pointerout', e=>e.currentTarget.alpha = 1.0);
-    titleButton.x = 130;
+    titleButton.x = 70;
     titleButton.y = 500;
     titleScreen.addChild(titleButton);
-
 }
 
 //will create all the text, buttons, and objects
 //onto the game screen
 function settupGameScreen(){
-
-    //sets the game score text to be 0 in the upper left hand corner
+    // Sets the game score text to be 0 in the upper left hand corner
     gameScore = new PIXI.Text("Score: 0");
     gameScore.style =  new PIXI.TextStyle({
-        fill: 0x00A86B,
+        fill: 0x00828C,
         fontSize: 28,
-        fontFamily: 'Georgia',
+        fontFamily: 'Arial',
         stroke: 0x000000,
         strokeThickness: 4
     })
@@ -232,69 +226,68 @@ function settupGameScreen(){
 //will create all the text, buttons, and objects
 //onto the end screen
 function settupEndScreen(){
-    
-    //adds the background to the end screen
+    // Adds the background to the end screen
     endScreen.addChild(endBackground);
 
-    //creates the death screen text
-    let endText = new PIXI.Text("You have Died");
+    // Creates the death screen text
+    let endText = new PIXI.Text("You have died!");
     endText.style = new PIXI.TextStyle({
-        fill: 0x00A86B,
-        fontSize: 40,
-        fontFamily: 'Georgia',
+        fill: 0x00828C,
+        fontSize: 60,
+        fontFamily: 'Arial',
         stroke: 0x000000,
         strokeThickness: 4
     })
-    endText.x = 160;
-    endText.y = 100;
+    endText.x = 100;
+    endText.y = 80;
     endScreen.addChild(endText);
 
-    //text that displays the final score onto the end screen
-    textScore = new PIXI.Text(`Your Final Score: ${score}`);
+    // Text that displays the final score onto the end screen
+    textScore = new PIXI.Text(`Final Score: ${score}`);
     textScore.style = new PIXI.TextStyle({
-        fill: 0x00A86B,
-        fontSize: 40,
-        fontFamily: 'Georgia',
+        fill: 0x00828C,
+        fontSize: 50,
+        fontFamily: 'Arial',
         stroke: 0x000000,
         strokeThickness: 4
     });
-    textScore.x = 125;
-    textScore.y = 300;
+    textScore.x = 120;
+    textScore.y = 250;
     endScreen.addChild(textScore);
 
-    textHighScore = new PIXI.Text(`Your High Score: ${Math.round(localStorage.getItem(highScoreKey))}`);
+    textHighScore = new PIXI.Text(`High Score: ${Math.round(localStorage.getItem(highScoreKey))}`);
     textHighScore.style = new PIXI.TextStyle({
-        fill: 0x00A86B,
-        fontSize: 40,
-        fontFamily: 'Georgia',
+        fill: 0x00828C,
+        fontSize: 50,
+        fontFamily: 'Arial',
         stroke: 0x000000,
         strokeThickness: 4
     });
-    textHighScore.x = 125;
-    textHighScore.y = 380;
+    textHighScore.x = 120;
+    textHighScore.y = 300;
     endScreen.addChild(textHighScore);
 
-    //creates a button that will reset the game and 
-    //put the player back at the title screen
+    // Creates a button that will reset the game and 
+    // put the player back at the title screen
     let endButton = new PIXI.Text("Restart Your Journey");
     endButton.style =  new PIXI.TextStyle({
-        fill: 0x00A86B,
-        fontSize: 40,
-        fontFamily: 'Georgia',
+        fill: 0x00828C,
+        fontSize: 55,
+        fontFamily: 'Arial',
         stroke: 0x000000,
         strokeThickness: 4
     })
     endButton.interactive = true;
     endButton.buttonMode = true;
-    endButton.on("pointerup", restartGame);//will call the function to restart the game for the player
+    endButton.on("pointerup", restartGame); // Will call the function to restart the game for the player
     endButton.on('pointerover', e=> e.target.alpha = .7);
     endButton.on('pointerout', e=>e.currentTarget.alpha = 1.0);
-    endButton.x = 110;
+    endButton.x = 40;
     endButton.y = 480;
     endScreen.addChild(endButton);
 }
 
-//function that starts the game for the player
+// Function that starts the game for the player
 function startGame(){
     // changes the visible screen to the game screen
     titleScreen.visible = false;
@@ -306,47 +299,40 @@ function startGame(){
     // Start update loop
     app.ticker.add(gameLoop);
 
-    playing = true;
-
     playingSquirmle = setInterval(movementBigSquirmle, 100);
 
     gameplayMusic.play();
 }
 
-//function that works as the game loop for the game
+// Function that works as the game loop for the game
 function gameLoop(){
-
-    //checks to see if there is a baby squirmle
-    //if not use the baby squirmle functions
+    // Checks to see if there is a baby squirmle
+    // if not use the baby squirmle functions
     if (babySquirmle != null){
         babySquirmleFunctions(babySquirmle);
     }
 
-    //function that will test to 
-    //see if the big squirmle is outside the bounds
-    //of the screen
+    // Function that will test to see if the big squirmle is outside the bounds of the screen
     wallCollision();
 
-    //function that will see
-    //if the big squirmle collides with itself
+    // Function that will see
+    // if the big squirmle collides with itself
     selfCollision();
     
-    //function for any of the functions
-    //that the food will need
+    // Function for any of the functions that the food will need
     foodFunctions();
 
-    //function that will spawn enemies
+    // Function that will spawn enemies
     spawnEnemies();
 
-    //function that is used for
-    //all of the uses that enemies have in game
+    // Function that is used for all of the uses that enemies have in game
     enemyFunctions();
 
     score += 0.01;
     gameScore.text = `Score: ${Math.round(score)}`;
-    //for each loop that will go through all 
-    //the enemies and then have them check their
-    //collision with other enemies
+
+    // For each loop that will go through all the enemies and then 
+    // have them check their collision with other enemies
     enemyList.forEach(enemy => {
         if (enemy != undefined) {
             enemyCollision(enemy);    
@@ -356,7 +342,6 @@ function gameLoop(){
 
 function movementBigSquirmle(){
     // Track all of the head's direction and coordinates from the previous frame to the current
-    //headSquirmle = squirmleList.head.element;
     headSquirmle.prevRotation = headSquirmle.rotation;
     headSquirmle.prevX = headSquirmle.x;
     headSquirmle.prevY = headSquirmle.y;
@@ -376,16 +361,16 @@ function movementBigSquirmle(){
     else if (keys["68"] && headSquirmle.prevRotation != left){ // D
         headSquirmle.rotation = right;
     }
-    else if(keys["32"] && babySquirmle == null && squirmleList.size > 3){ // Spacebar
-        babySound.play();
-
+    else if(keys["32"] && babySquirmle == null && squirmleList.size > 3){ // Spacebar spawns a baby
+        // Get rid of the tail, replace texture of old one so it doesn't show.
+        // Also replace the new tail sprite of the squirmle
         squirmleList.tail.element.texture = spriteEmpty;
         squirmleList.poop();
+        squirmleList.tail.element.texture = spriteTailLeft;
         
+        babySound.play();
         babySquirmle = new BabySquirmle(headSquirmle.x, headSquirmle.y);
         gameScreen.addChild(babySquirmle);
-
-        squirmleList.tail.element.texture = spriteTailLeft;
     }
 
     // Move the head's x and y coordinates based on direction facing
@@ -412,14 +397,17 @@ function movementBigSquirmle(){
         current.element.y = current.prev.element.prevY;
 
         // Set rotation of each body part to check for corner sprites
+        // This actually doesn't rotate the sprites, these are temporary variables
+        // that are useful for the tail
         current.element.prevRotation = current.element.imageRotation;
         current.element.imageRotation = current.prev.element.prevRotation;
 
         current = current.next;
     }
 
+    // Change sprite of each body part if they are changing directions
+    // like a corner being formed. Also change the tail's direction
     current = squirmleList.head.next;
-    // Change sprite of each body part if they are changing directions AKA a corner is formed
     while(current != null){
         if(current.next != null){ 
             if((current.next.element.x - current.element.x == -20 && 
@@ -458,7 +446,7 @@ function movementBigSquirmle(){
             {
                 current.element.texture = spriteLeftToUp;
             }
-            else {
+            else { // The current location shows no change in direction, keep as a square sprite
                 current.element.texture = spriteBody;
             }
         }
@@ -480,107 +468,94 @@ function movementBigSquirmle(){
     }
 }
 
-function keysDown(e) {
-    keys[e.keyCode] = true;
-}
-
-function keysUp(e) {
-    keys[e.keyCode] = false;
-}
-
-//function that will be used to check to see if
-//there is a collision between the head squrimle 
+// Function that will be used to check to see if
+// there is a collision between the head squrimle 
 function foodFunctions(){
-
-    //if there is no food create a food and add it
-    //to the scene
+    // If there is no food create a food and add it to the scene
     if (food == null) {
         food = new Food();
         gameScreen.addChild(food);
     }
-    //if there is a food check to see if there is a collision
-    //if there is a collision remove that food and create a new food 
-    else if (food != null) {
+    // If there is food, check for a collision remove that 
+    // food and create a new food 
+    else {
         if (b.hit(headSquirmle, food)) {
             eatSound.play();
             score += 5;
+
+            // Replace the food
             gameScreen.removeChild(food);
             food = new Food();
-            foodCount++;
             gameScreen.addChild(food);
+            foodCount++;
 
+            // Big squirmle gets bigger
             addBodySquirmle();
         }
     }
 }
 
-//function that will add a body squirmle
-//to the body of the squirmle
+// Function that will add a body squirmle
+// to the body of the squirmle
 function addBodySquirmle(){
     let bodySquirmle = new BodySquirmle();
     squirmleList.add(bodySquirmle);
     gameScreen.addChild(bodySquirmle);
 }
 
-//function that will spawn more enemies 
-//depending on how many foods that were eaten
+// Function that will spawn more enemies 
+// depending on how many foods that were eaten
 function spawnEnemies(){
-
-    //calculates the amount of enemies that should be spawned
+    // Calculates the amount of enemies that should be spawned
     let enemyCount = parseInt(foodCount / 2);
 
-    //if there is less than one food eaten 
-    //then only make one enemy allowed
+    // If there is less than one food eaten 
+    // then only make one enemy allowed
     if (enemyCount < 1) {
         enemyCount = 1;
     }
     
-    //for loop that will create the enemies 
-    //then adds them to the list of enemies
+    // For loop that will create the enemies 
+    // then adds them to the list of enemies
     for (let i = 0; i < enemyCount; i++) {
-        
-        let random = Math.random()
-        let tempX;
-        let tempY;
-        if (random < 0.25){
-            tempX = -50;
-            tempY = Math.random() * 700;
-        }
-        else if (random < 0.5){
-            tempX = 650;
-            tempY = Math.random() * 700;
-        }
-        else if (random < 0.75){
-            tempX = Math.random() * 700;
-            tempY = -50;
-        }
-        else {
-            tempX = Math.random() * 700;
-            tempY = 650;
-        }
-
-        let enemy = new EnemySquirmle(tempX, tempY);
-        
         if (enemyList[i] == null) {
-            enemyList[i] = enemy;
-
+            // Finds coordinates to spawn in outside of the playing field
+            let random = Math.random()
+            let tempX;
+            let tempY;
+            if (random < 0.25){
+                tempX = -50;
+                tempY = Math.random() * 700;
+            }
+            else if (random < 0.5){
+                tempX = 650;
+                tempY = Math.random() * 700;
+            }
+            else if (random < 0.75){
+                tempX = Math.random() * 700;
+                tempY = -50;
+            }
+            else {
+                tempX = Math.random() * 700;
+                tempY = 650;
+            }
+            
+            enemyList[i] = new EnemySquirmle(tempX, tempY);
             gameScreen.addChild(enemyList[i]);
         }
     }
 }
 
-//function that will go through all the enemies
-//let them move and checks to see if there is a
-//collision between the head squirmle and an enemy
+// Function that will go through all the enemies
+// let them move and checks to see if there is a
+// collision between the head squirmle and an enemy
 function enemyFunctions(){
     enemyList.forEach(enemy => {
         if (enemy.x - headSquirmle.x < 0) {
             enemy.x += .5;
-
         }
         if (enemy.x - headSquirmle.x > 0) {
             enemy.x -= .5;
-
         }
         if (enemy.y - headSquirmle.y < 0) {
             enemy.y += .5;
@@ -592,15 +567,14 @@ function enemyFunctions(){
             endGame();
         }
         
-        //gets the vector between the enemy and headsquirmle for both
-        //x and y directions
+        // Gets the vector between the enemy and headsquirmle for both
+        // x and y directions
         let directionX = enemy.x - headSquirmle.x;
         let directionY = enemy.y - headSquirmle.y;
         
-        //changes the enemy rotation based on the angle between both the x and y direction
-        //it is in the opposition direction so rotate by 90
+        // Changes the enemy rotation based on the angle between both the x and y direction
+        // it is in the opposition direction so rotate by 90
         enemy.rotation = Math.atan2(directionY, directionX) - 90;
-
     });
 }
 
@@ -608,75 +582,60 @@ function enemyFunctions(){
 //check to see if it collides with an enemy
 //and any other functions
 function babySquirmleFunctions(bodySquirmle){
-
-    //gets the mouse position in the game screen
+    // Gets the mouse position in the game screen
     let mousePosition = app.renderer.plugins.interaction.mouse.global;
 
-    //gets the delta time of the game 
+    // Gets the delta time of the game 
     let deltaTime = 1/app.ticker.FPS;
     if(deltaTime > 1/32) deltaTime = 1/32;
     let amt = 6 * deltaTime;
 
-    //creates the new x and y positions using 
-    //linear interpolate
+    // Creates the new x and y positions using linear interpolate
     let newX = bodySquirmle.x * (1-amt) + amt * mousePosition.x;
     let newY = bodySquirmle.y * (1-amt) + amt * mousePosition.y;
 
-    //gets the heiht and width of the squrimle
+    // Gets the heiht and width of the squrimle
     let w2 = bodySquirmle.width/2;
     let h2 = bodySquirmle.height/2;
 
-    //clamps the squirmle to inside of the scene
+    // Clamps the squirmle to inside of the scene
     bodySquirmle.x = clamp(newX, 0+w2, sceneWidth-w2);
     bodySquirmle.y = clamp(newY, 0+h2, sceneHeight-h2)
 
-    //for loop that will go through the enemies and check to see
-    //if there is a collision with the babysqurimle
+    // For loop that will go through the enemies and check to see
+    // if there is a collision with the babysqurimle
     for (let i = 0; i < enemyList.length; i++) {
-
-        //if there is a collision remove both the 
-        //baby squrimle and the enemy from the game
+        // If there is a collision remove both the 
+        // baby squrimle and the enemy from the game
         if (b.hit(bodySquirmle, enemyList[i])) {
             babySound.stop();
+            score += 10;
+
             gameScreen.removeChild(babySquirmle);
             babySquirmle = null;
+
             gameScreen.removeChild(enemyList[i]);
             enemyList[i] = null
-
         }
     }
 }
 
-//function that will check to see 
-//the headsquirmle is outside the scene bounds
+// Function that will check to see the headsquirmle is outside the scene bounds
 function wallCollision(){
-
-    //headsquirmle x position is too high
-    if (headSquirmle.x > sceneWidth) {
-        endGame();
-    }
-    //headsqurmle x position too low
-    else if (headSquirmle.x < 0) {
-        endGame();
-    }
-    //headsquirmle y position is too high
-    else if (headSquirmle.y > sceneHeight) {
-        endGame();
-    }
-    //headsquirmle y position is too low
-    else if (headSquirmle.y < 0) {
+    if (headSquirmle.x > sceneWidth || headSquirmle.x < 0 || 
+        headSquirmle.y > sceneHeight || headSquirmle.y < 0)
+    {
         endGame();
     }
 }
 
+// Checks if the head's x-y coords match any of its body parts
 function selfCollision(){
-
     current = squirmleList.head.next;
     while(current != null){
         if(current.element.x == squirmleList.head.element.x && current.element.y == squirmleList.head.element.y){
             endGame();
         }
-
         current = current.next;
     }
 }
@@ -689,40 +648,37 @@ function endGame(){
     // removes game loop from ticking
     app.ticker.remove(gameLoop);
 
+    if(score > storedHighScore){
+        storedHighScore = score;
+        localStorage.setItem(highScoreKey, score);
+    }
+
     //updates the text score on the final screen with the score from in game
-    textScore.text = `Your Final Score: ${Math.round(score)}`;
-    textHighScore.text = `Your High Score: ${Math.round(localStorage.getItem(highScoreKey))}`;
+    textScore.text = `Final Score: ${Math.round(score)}`;
+    textHighScore.text = `High Score: ${Math.round(localStorage.getItem(highScoreKey))}`;
 
     //switches screens to end screen
     gameScreen.visible = false;
     endScreen.visible = true;
 
-    //switches from the game music to
-    //the game over music
+    // Stop any gameplay sounds, play game over sound
     gameplayMusic.stop();
-    gameOverSound.play();
-
-    if(score > storedHighScore){
-        localStorage.setItem(highScoreKey, score);
-    }
-
-    //stops any extra sounds going on
     babySound.stop();
     eatSound.stop();
+    gameOverSound.play();
 
-    //removes all enemies from the game
-    //then creates a new fresh enemy list
+    // Removes all enemies from the game then creates a new fresh enemy list
     enemyList.forEach(enemy => {
         gameScreen.removeChild(enemy);
     });
     enemyList = [];
 
-    //reset baby
+    // Reset baby
     babySound.stop();
     gameScreen.removeChild(babySquirmle);
     babySquirmle = null;
 
-    // reset the squirmle
+    // Reset the squirmle
     let size = squirmleList.size
     for (let i = 0; i < size; i++) {
         squirmleList.tail.element.texture = spriteEmpty;
@@ -734,6 +690,7 @@ function endGame(){
     squirmleList.tail = null;
     squirmleList.size = 0;
 
+    // Re-create the squirmle
     squirmleList.add(new BodySquirmle(210, 210));
     headSquirmle = squirmleList.head.element;
     headSquirmle.texture = spriteHead;
@@ -742,30 +699,29 @@ function endGame(){
     squirmleList.add(new BodySquirmle(150, 210));
     squirmleList.add(new BodySquirmle(130, 210));
     squirmleList.tail.element.texture = spriteTailBot;
-
+    // and of course add it back to the game screen
     let currently = squirmleList.head;
     while(currently != null){
         gameScreen.addChild(currently.element);
         currently = currently.next;
     }
     
-
-    // reset other stats
+    // Reset other stats
     gameScreen.removeChild(food);
     food = null;
     foodCount = 0;
     score = 0;
 }
 
-//sends you back to the start screen
+// Sends you back to the start screen
 function restartGame(){
     endScreen.visible = false;
     titleScreen.visible = true;
 }
 
-//function that will check to see if 
-//one enemy is colliding with any others
-//if they do then have them move away from the colliding enemy
+// Function that will check to see if 
+// one enemy is colliding with any others
+// if they do then have them move away from the colliding enemy
 function enemyCollision(enemy){
     for (let i = 0; i < enemyList.length; i++) {
         if (enemy != enemyList[i] && enemyList[i] != undefined){
@@ -776,8 +732,15 @@ function enemyCollision(enemy){
     }
 }
 
-
-// we use this to keep the ship on the screen
+// We use this to keep the ship on the screen
 function clamp(val, min, max){
     return val < min ? min : (val > max ? max : val);
+}
+
+function keysDown(e) {
+    keys[e.keyCode] = true;
+}
+
+function keysUp(e) {
+    keys[e.keyCode] = false;
 }
