@@ -34,7 +34,10 @@ let spriteLeftToBot = PIXI.Texture.fromImage("media/leftToBot.png");
 let spriteBody = PIXI.Texture.fromImage("media/squirmleBody.png");
 let spriteEmpty = PIXI.Texture.fromImage("media/empty.png");
 
+//https://www.textures.com/
 let grass = PIXI.Texture.fromImage("media/grass.JPG");
+
+//https://www.html5gamedevs.com/topic/13784-full-screen-background-image/
 let titleBackground = new PIXI.Sprite(grass);
 let gameBackground = new PIXI.Sprite(grass);
 let endBackground = new PIXI.Sprite(grass);
@@ -159,18 +162,21 @@ function settupTitleScreen(){
     titleScreen.addChild(title);
 
     //creates the title text
-    let controls = new PIXI.Text("          W A S D - Squirmle Movement " +  
-    "\n         Space - Create a Baby Squirmle " +
-    "\nMouse - moves any created baby squirmles");
+    let controls = new PIXI.Text("W, A, S, D - Squirmle Movement " +  
+    "\nSpace - Create a Baby Squirmle " +
+    "\nMouse - Moves baby squirmles " +
+    "\nAvoid the enemy squirmles");
     controls.style = new PIXI.TextStyle({
         fill: 0x00A86B,
-        fontSize: 20,
+        fontSize: 30,
         fontFamily: 'Georgia',
         stroke: 0x000000,
         strokeThickness: 4
+        
     })
-    controls.x = 120;
-    controls.y = 300;
+    controls.anchor.set(.5);
+    controls.x = 330;
+    controls.y = 320;
     titleScreen.addChild(controls);
 
     //creates the button to let the player 
@@ -187,7 +193,7 @@ function settupTitleScreen(){
     titleButton.buttonMode = true;
     titleButton.on("pointerup", startGame);//will call the function to start the game for the player
     titleButton.on('pointerover', e=> e.target.alpha = .7);
-    titleButton.on('pointerour', e=>e.currentTarget.alpha = 1.0);
+    titleButton.on('pointerout', e=>e.currentTarget.alpha = 1.0);
     titleButton.x = 130;
     titleButton.y = 500;
     titleScreen.addChild(titleButton);
@@ -256,7 +262,7 @@ function settupEndScreen(){
     endButton.buttonMode = true;
     endButton.on("pointerup", restartGame);//will call the function to restart the game for the player
     endButton.on('pointerover', e=> e.target.alpha = .7);
-    endButton.on('pointerour', e=>e.currentTarget.alpha = 1.0);
+    endButton.on('pointerout', e=>e.currentTarget.alpha = 1.0);
     endButton.x = 110;
     endButton.y = 480;
     endScreen.addChild(endButton);
