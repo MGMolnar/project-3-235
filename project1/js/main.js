@@ -232,6 +232,15 @@ function gameLoop(){
     spawnEnemies();
 
     enemyFunctions();
+
+    //for each loop that will go through all 
+    //the enemies and then have them check their
+    //collision with other enemies
+    enemyList.forEach(enemy => {
+        if (enemy != undefined) {
+            enemyCollision(enemy);    
+        }
+    });
 }
 
 function movementBigSquirmle(){
@@ -545,6 +554,19 @@ function endGame(){
 
 function restartGame(){
     startGame();
+}
+
+//function that will check to see if 
+//one enemy is colliding with any others
+//if they do then have them move away from the colliding enemy
+function enemyCollision(enemy){
+    for (let i = 0; i < enemyList.length; i++) {
+        if (enemy != enemyList[i] && enemyList[i] != undefined){
+            if(b.hit(enemy, enemyList[i])) {
+                enemy.x += enemy.x - enemyList[i].x;
+            }
+        }
+    }
 }
 
 //function that starts the game for the player
