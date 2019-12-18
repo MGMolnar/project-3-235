@@ -1,5 +1,5 @@
 class BodySquirmle extends PIXI.Sprite{
-    constructor(x = 200, y = 200, rotation = Math.PI/2, texture = "media/squirmleTest.png"){
+    constructor(x = -200, y = -200, rotation = Math.PI/2, texture = "media/squirmleTest.png"){
         super(PIXI.Texture.from(texture));
         this.anchor.set(.5, .5);
         this.x = x;
@@ -84,13 +84,13 @@ class Food extends PIXI.Graphics{
 }
 
 class EnemySquirmle extends PIXI.Graphics{
-    constructor(x = 250, y = 250, color = 0x00FF00){
+    constructor(x = -10, y = -10, color = 0x00FF00){
         super();
         this.beginFill(color);
         this.drawRect(-2, -2, 18, 18);
         this.endFill();
-        this.x = parseInt(Math.random() * 500);
-        this.y = parseInt(Math.random() * 500);
+        this.x = x;
+        this.y = y;
 
     }
 }
