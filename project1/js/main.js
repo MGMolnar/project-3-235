@@ -561,9 +561,11 @@ function enemyFunctions(){
     enemyList.forEach(enemy => {
         if (enemy.x - headSquirmle.x < 0) {
             enemy.x += .5;
+
         }
         if (enemy.x - headSquirmle.x > 0) {
             enemy.x -= .5;
+
         }
         if (enemy.y - headSquirmle.y < 0) {
             enemy.y += .5;
@@ -574,6 +576,16 @@ function enemyFunctions(){
         if (b.hit(headSquirmle, enemy)) {
             endGame();
         }
+        
+        //gets the vector between the enemy and headsquirmle for both
+        //x and y directions
+        let directionX = enemy.x - headSquirmle.x;
+        let directionY = enemy.y - headSquirmle.y;
+        
+        //changes the enemy rotation based on the angle between both the x and y direction
+        //it is in the opposition direction so rotate by 90
+        enemy.rotation = Math.atan2(directionY, directionX) - 90;
+
     });
 }
 
