@@ -14,7 +14,6 @@ let stage;
 let keys = {};
 let headSquirmle;
 let current;
-let score = 0;
 
 let babySquirmle = null;
 
@@ -55,13 +54,34 @@ let left = 3 * Math.PI/2;
 let down = Math.PI;
 let right = Math.PI/2;
 
+let score = 0;
+let gameScore;
 //text for the score on the end screen
 let textScore;
 
 window.addEventListener("keydown", keysDown);
 window.addEventListener("keyup", keysUp);
 
+let prefix;
+let highScoreKey;
+let storedHighScore;
+
+window.onload = init;
+
 createPages();
+
+
+// Functions
+function init(){
+    // Give each search option a key for storage
+    prefix = "nmm3037-";
+    highScoreKey = prefix + "highScore";
+
+    storedHighScore = localStorage.getItem(highScoreKey);
+    if (storedHighScore){
+        
+    }
+}
 
 //used to create the four different scenes in the scene.
 function createPages(){
@@ -77,14 +97,14 @@ function createPages(){
     stage.addChild(gameScreen);
 
     squirmleList = new LinkedList();
-    squirmleList.add(new BodySquirmle());
+    squirmleList.add(new BodySquirmle(200, 200));
     headSquirmle = squirmleList.head.element;
     headSquirmle.texture = spriteHead;
-    squirmleList.add(new BodySquirmle(180));
-    squirmleList.add(new BodySquirmle(160));
-    squirmleList.add(new BodySquirmle(140));
-    squirmleList.add(new BodySquirmle(120));
-    squirmleList.tail.element.texture = spriteTailLeft;
+    squirmleList.add(new BodySquirmle(180, 200));
+    squirmleList.add(new BodySquirmle(160, 200));
+    squirmleList.add(new BodySquirmle(140, 200));
+    squirmleList.add(new BodySquirmle(120, 200));
+    squirmleList.tail.element.texture = spriteTailBot;
 
     let current = squirmleList.head;
     while(current != null){
@@ -103,6 +123,8 @@ function createPages(){
     //a function that will put all the text,
     //objects, or buttons onto the title screen
     settupTitleScreen();
+
+    settupGameScreen();
 
     //function that will settup the end screen
     settupEndScreen();
@@ -166,6 +188,17 @@ function settupTitleScreen(){
 //onto the game screen
 function settupGameScreen(){
 
+    gameScore = new PIXI.Text("Score: 0");
+    gameScore.style =  new PIXI.TextStyle({
+        fill: 0x00A86B,
+        fontSize: 28,
+        fontFamily: 'Georgia',
+        stroke: 0x000000,
+        strokeThickness: 4
+    })
+    gameScore.x = 5;
+    gameScore.y = 0;
+    gameScreen.addChild(gameScore);
 }
 
 //will create all the text, buttons, and objects
@@ -217,6 +250,24 @@ function settupEndScreen(){
     endScreen.addChild(endButton);
 }
 
+//function that starts the game for the player
+function startGame(){
+    // changes the visible screen to the game screen
+    titleScreen.visible = false;
+    gameScreen.visible = true;
+
+    foodCount = 0;
+
+    // Start update loop
+    app.ticker.add(gameLoop);
+
+    setInterval(movementBigSquirmle, 100);
+
+    gameplayMusic.play();
+
+    
+}
+
 function gameLoop(){
 
     if (babySquirmle != null){
@@ -233,6 +284,8 @@ function gameLoop(){
 
     enemyFunctions();
 
+    score += 0.01;
+    gameScore.text = `Score: ${Math.round(score)}`;
     //for each loop that will go through all 
     //the enemies and then have them check their
     //collision with other enemies
@@ -392,6 +445,7 @@ function foodFunctions(){
     else if (food != null) {
         if (b.hit(headSquirmle, food)) {
             eatSound.play();
+            score += 5;
             gameScreen.removeChild(food);
             food = new Food();
             foodCount++;
@@ -417,20 +471,37 @@ function spawnEnemies(){
     //calculates the amount of enemies that should be spawned
     let enemyCount = parseInt(foodCount / 2);
 
-
     //if there is less than one food eaten 
     //then only make one enemy allowed
     if (enemyCount < 1) {
         enemyCount = 1;
-        //console.log(enemyCount);
     }
     
     //for loop that will create the enemies 
     //then adds them to the list of enemies
     for (let i = 0; i < enemyCount; i++) {
-        let enemy = new EnemySquirmle();
+        
+        let random = Math.random()
+        let tempX;
+        let tempY;
+        if (random < 0.25){
+            tempX = -50;
+            tempY = Math.random() * 700;
+        }
+        else if (random < 0.5){
+            tempX = 650;
+            tempY = Math.random() * 700;
+        }
+        else if (random < 0.75){
+            tempX = Math.random() * 700;
+            tempY = -50;
+        }
+        else {
+            tempX = Math.random() * 700;
+            tempY = 650;
+        }
 
-        //console.log(enemy);
+        let enemy = new EnemySquirmle(tempX, tempY);
         
         if (enemyList[i] == null) {
             enemyList[i] = enemy;
@@ -504,7 +575,6 @@ function babySqurmleFunctions(bodySquirmle){
 
         }
     }
-    
 }
 
 //function that will check to see 
@@ -543,10 +613,19 @@ function selfCollision(){
 
 //sets the endscreen to be visible
 function endGame(){
-    
+    app.ticker.remove(gameLoop);
+
+    textScore.text = `Your Final Score: ${Math.round(score)}`;
+
     gameScreen.visible = false;
     endScreen.visible = true;
+
     gameplayMusic.stop();
+    gameOverSound.play();
+
+    if(score > storedHighScore){
+        localStorage.setItem(highScoreKey, score);
+    }
     babySound.stop();
     eatSound.stop();
     //gameOverSound.play();
